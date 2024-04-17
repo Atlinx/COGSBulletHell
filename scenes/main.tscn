@@ -1,0 +1,192 @@
+[gd_scene load_steps=5 format=3 uid="uid://4uh673757wtx"]
+
+[ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
+[ext_resource type="Script" path="res://scripts/main_menu_ui.gd" id="1_ok3ni"]
+[ext_resource type="Script" path="res://scenes/menu_manager.gd" id="1_qh41f"]
+[ext_resource type="Script" path="res://scripts/lobby_ui.gd" id="2_6kl11"]
+
+[node name="Main" type="Node2D"]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="MenuManager" type="Control" parent="UI" node_paths=PackedStringArray("network_manager")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qh41f")
+network_manager = NodePath("../../NetworkManager")
+
+[node name="MainMenu" type="Control" parent="UI/MenuManager" node_paths=PackedStringArray("menu_manager", "network_manager", "ip_line_edit", "port_line_edit", "host_button", "join_button", "cancel_button")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ok3ni")
+menu_manager = NodePath("..")
+network_manager = NodePath("../../../NetworkManager")
+ip_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer/IPLineEdit")
+port_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2/PortLineEdit")
+host_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3/HostButton")
+join_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3/JoinButton")
+cancel_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/CancelButton")
+
+[node name="PanelContainer" type="PanelContainer" parent="UI/MenuManager/MainMenu"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -79.5
+offset_top = -80.0
+offset_right = 79.5
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/MenuManager/MainMenu/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "COGS Bullet Hell"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "IP"
+
+[node name="IPLineEdit" type="LineEdit" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer"]
+layout_mode = 2
+text = "localhost"
+
+[node name="HSplitContainer2" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "Port"
+
+[node name="PortLineEdit" type="LineEdit" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2"]
+layout_mode = 2
+text = "9955"
+
+[node name="HSplitContainer3" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Host"
+
+[node name="JoinButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Join"
+
+[node name="CancelButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[node name="Lobby" type="Control" parent="UI/MenuManager" node_paths=PackedStringArray("network_manager", "ready_button", "leave_button", "lobby_info_label", "lobby_users_label", "username_line_edit")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_6kl11")
+network_manager = NodePath("../../../NetworkManager")
+ready_button = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/ReadyButton")
+leave_button = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/LeaveButton")
+lobby_info_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/LobbyInfoLabel")
+lobby_users_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/LobbyUsersLabel")
+username_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer/UsernameLineEdit")
+
+[node name="PanelContainer" type="PanelContainer" parent="UI/MenuManager/Lobby"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -79.5
+offset_top = -80.0
+offset_right = 79.5
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/MenuManager/Lobby/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+layout_mode = 2
+text = "COGS Bullet Hell Lobby"
+
+[node name="LobbyInfoLabel" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "[3]: 192.234
+[3]: 192.234"
+
+[node name="LobbyUsersLabel" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "[3]: 192.234
+[3]: 192.234"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+text = "Username"
+
+[node name="UsernameLineEdit" type="LineEdit" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+
+[node name="ReadyButton" type="Button" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+text = "Ready"
+
+[node name="LeaveButton" type="Button" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+text = "Leave"
+
+[node name="NetworkManager" type="Node" parent="." node_paths=PackedStringArray("username_line_edit", "ready_button")]
+script = ExtResource("1_fnu50")
+username_line_edit = NodePath("../UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer/UsernameLineEdit")
+ready_button = NodePath("../UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/ReadyButton")
