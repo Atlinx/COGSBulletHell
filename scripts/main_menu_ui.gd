@@ -28,8 +28,8 @@ func _on_game_reseted():
 
 
 func _on_host_pressed():
-	network_manager.host_server(int(port_line_edit.text))
-	menu_manager.transition_to_menu("Lobby")
+	if network_manager.host_server(int(port_line_edit.text)):
+		menu_manager.transition_to_menu("Lobby")
 
 
 func _on_join_pressed():

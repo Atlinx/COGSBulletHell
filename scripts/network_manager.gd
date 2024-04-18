@@ -35,6 +35,9 @@ var is_headless: bool = false
 var is_player: bool :
 	get:
 		return not is_headless
+var can_ready_up: bool :
+	get:
+		return _all_unique_usernames()
 
 var _readied_player_count: int :
 	get:
@@ -67,6 +70,11 @@ class NetworkPlayer extends RefCounted:
 
 # [multiplayer_id: int]: NetworkPlayer
 var network_players: Dictionary
+var network_players_list: Array[NetworkPlayer]:
+	get:
+		var arr: Array[NetworkPlayer] = []
+		arr.assign(network_players.values())
+		return arr
 var my_network_player: NetworkPlayer:
 	get:
 		return network_players[multiplayer.get_unique_id()]
@@ -94,20 +102,22 @@ func join_server(_address: String, _port: int):
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_client(address, port)
 	if error != OK:
-		print("Cannot create client: " + error)
+		print("Cannot create client: " + error_string(error))
+		reset_game()
 		return
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 
 
-func host_server(_port: int):
+func host_server(_port: int) -> bool:
 	address = "localhost"
 	port = _port
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(port, 8)
 	if error != OK:
-		print("Cannot host: " + error)
-		return
+		print("Cannot host: " + error_string(error))
+		reset_game()
+		return false
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 	network_players = {}
@@ -115,6 +125,7 @@ func host_server(_port: int):
 	print("Waiting for network_players")
 	if is_player:
 		_on_connected_to_server()
+	return true
 
 
 func update_my_network_player():

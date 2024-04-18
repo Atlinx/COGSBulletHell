@@ -47,11 +47,14 @@ func _on_network_players_updated():
 		lobby_users_label.text += "%s %s" % [lobby_player.username, "(Readied)" if lobby_player.readied_up else ""]
 		if i < lobby_players.size() - 1:
 			lobby_users_label.text += "\n"
+	if not network_manager.my_network_player.readied_up:
+		ready_button.disabled = not network_manager.can_ready_up
 
 
 func _on_ready_pressed():
-	ready_button.disabled = true
-	network_manager.ready_up.rpc()
+	if network_manager.can_ready_up:
+		ready_button.disabled = true
+		network_manager.ready_up.rpc()
 
 
 func _on_leave_pressed():
