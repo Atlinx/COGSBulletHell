@@ -231,10 +231,8 @@ text = "Disconnect"
 layout_mode = 2
 text = "Player 11"
 
-[node name="NetworkManager" type="Node" parent="." node_paths=PackedStringArray("username_line_edit", "ready_button")]
+[node name="NetworkManager" type="Node" parent="."]
 script = ExtResource("1_fnu50")
-username_line_edit = NodePath("../UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer/UsernameLineEdit")
-ready_button = NodePath("../UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/ReadyButton")
 
 [node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("network_manager", "world", "player_spawner")]
 script = ExtResource("5_fo7ky")

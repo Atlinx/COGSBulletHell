@@ -13,7 +13,7 @@ var players: Dictionary
 @export var player_spawner: MultiplayerSpawner
 
 var my_player: Player
-var _game_started: bool
+var is_in_game: bool
 
 
 func _ready():
@@ -25,27 +25,27 @@ func _ready():
 
 
 func _on_player_spawned(player_node: Player):
-	print("receive player spawned: ", player_node)
 	players[player_node.network_player.multiplayer_id] = player_node
-	if player_node.network_player.multiplayer_id == multiplayer.get_unique_id():
+	if player_node.is_controlling_player:
 		my_player = player_node
-	if not _game_started and players.size() == network_manager.network_players.size():
-		_game_started = true
-		print("GameManager: Game started")
+	if not is_in_game and players.size() == network_manager.network_players.size():
+		is_in_game = true
 		game_started.emit()
 
 
 func _on_player_despawned(player_node: Player):
-	if player_node.player_id in players:
-		players.erase(player_node.player_id)
-		if player_node.player_id == multiplayer.get_unique_id():
+	if player_node.network_player.multiplayer_id in players:
+		players.erase(player_node.network_player.multiplayer_id)
+		if player_node.is_controlling_player:
 			my_player = null
 
 
 func _on_game_reseted():
 	for child in world.get_children():
 		child.queue_free()
-	_game_started = false
+	players = {}
+	is_in_game = false
+	my_player = null
 
 
 func _on_game_started():

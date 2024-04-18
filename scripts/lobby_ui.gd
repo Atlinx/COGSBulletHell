@@ -23,6 +23,7 @@ func _on_menu_load():
 		lobby_info_label.text = "Hosting @ %s" % [network_manager.port]
 	else:
 		lobby_info_label.text = "Connected @ %s:%s" % [network_manager.address, network_manager.port]
+	username_line_edit.text = network_manager.my_network_player.username
 
 
 func _on_game_reseted():

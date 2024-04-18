@@ -1,28 +1,22 @@
-[gd_scene load_steps=7 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=5 format=3 uid="uid://dwovq5jl3h058"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_g1jet"]
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
-[ext_resource type="Script" path="res://scripts/player_input.gd" id="2_px8ni"]
+
+[sub_resource type="Curve" id="Curve_oqvcf"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
+point_count = 2
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vt3h3"]
 radius = 32.0
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_044wi"]
-properties/0/path = NodePath("PlayerInput:direction")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_t5qju"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("player_input", "camera")]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera")]
 collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_g1jet")
-player_input = NodePath("PlayerInput")
+speed = 500.0
 camera = NodePath("Camera2D")
+interpolate_curve = SubResource("Curve_oqvcf")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
@@ -30,16 +24,5 @@ texture = ExtResource("1_mtwg5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_vt3h3")
-
-[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
-replication_interval = 0.05
-delta_interval = 0.05
-replication_config = SubResource("SceneReplicationConfig_044wi")
-script = ExtResource("2_px8ni")
-
-[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_interval = 0.05
-delta_interval = 0.05
-replication_config = SubResource("SceneReplicationConfig_t5qju")
 
 [node name="Camera2D" type="Camera2D" parent="."]

@@ -24,8 +24,20 @@ func _on_reseted():
 
 func _on_game_started():
 	visible = true
+	_update_info_label()
+
+
+func _update_info_label():
 	if multiplayer.is_server():
 		info_label.text = "Hosting @ " + str(network_manager.port) + "\n"
 	else:
 		info_label.text = "Connected @ " + network_manager.address + ":" + str(network_manager.port) + "\n"
 	info_label.text += game_manager.my_player.network_player.username + "\n"
+	info_label.text += "Latency: %.4f ms\n" % network_manager.average_latency
+	info_label.text += "RTT: %.4f ms\n" % network_manager.average_rtt
+	info_label.text += "Time Offset: %.4f ms\n" % network_manager.server_client_time_offset
+
+
+func _process(delta):
+	if game_manager.is_in_game:
+		_update_info_label()
