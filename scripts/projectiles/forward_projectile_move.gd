@@ -19,7 +19,6 @@ func _on_constructed(data: Dictionary):
 	direction = data.get("direction", direction)
 	projectile.global_position = data.get("position", Vector2.ZERO)
 	var server_time: float = data.get("time")
-	print("  time diff:", network_manager.server_time - server_time)
 	var dist_already_travelled = direction * speed * (network_manager.server_time - server_time)
 	projectile.global_position += dist_already_travelled
 

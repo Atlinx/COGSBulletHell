@@ -13,7 +13,7 @@ signal on_shoot
 
 
 func _ready():
-	projectile_manager.prefix = "Player" + str(player.network_player_index)
+	projectile_manager.prefix = "Player" + str(player.network_player_index) + "Proj"
 	input.on_shoot.connect(_on_shoot)
 
 

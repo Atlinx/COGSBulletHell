@@ -17,13 +17,18 @@ func _ready():
 
 
 func destroy():
-	if _is_destroyed:
+	_destroy.rpc()
+
+
+@rpc("authority", "call_local", "reliable")
+func _destroy():
+	if not _is_destroyed:
 		_is_destroyed = true
 		destroyed.emit()
-		get_parent().queue_free()
+		get_parent().queue_free.call_deferred()
 
 
 func _process(delta):
-	_lifetime_timer += lifetime
+	_lifetime_timer += delta
 	if _lifetime_timer >= lifetime:
 		destroy()

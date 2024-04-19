@@ -40,11 +40,13 @@ func _on_username_changed(new_text: String):
 
 
 func _on_network_players_updated():
+	if network_manager.game_state != NetworkManager.GameState.LOBBY:
+		return
 	lobby_users_label.text = ""
 	var lobby_players = network_manager.network_players_sorted_list
 	for i in range(lobby_players.size()):
 		var lobby_player: NetworkManager.NetworkPlayer = lobby_players[i]
-		lobby_users_label.text += "%s %s" % [lobby_player.username, "(Readied)" if lobby_player.readied_up else ""]
+		lobby_users_label.text += "%s%s%s" % [lobby_player.username, " (Host)" if lobby_player.multiplayer_id == 1 else "", " (Readied)" if lobby_player.readied_up else ""]
 		if i < lobby_players.size() - 1:
 			lobby_users_label.text += "\n"
 	if not network_manager.my_network_player.readied_up:

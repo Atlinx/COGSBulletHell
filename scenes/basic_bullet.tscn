@@ -37,6 +37,10 @@ speed = 500.0
 
 [node name="Destroy" type="Node2D" parent="."]
 script = ExtResource("4_ir47d")
+lifetime = 1.0
 
 [node name="Team" type="Node" parent="."]
 script = ExtResource("7_golyg")
+
+[connection signal="detector_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
+[connection signal="wall_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]

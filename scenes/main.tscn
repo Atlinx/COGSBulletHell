@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=11 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/level.tscn" id="1_negoe"]
@@ -10,7 +10,6 @@
 [ext_resource type="Script" path="res://scripts/gameplay_ui.gd" id="4_lewxl"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
 [ext_resource type="PackedScene" uid="uid://dwovq5jl3h058" path="res://scenes/player.tscn" id="6_qj4uo"]
-[ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="10_ggha3"]
 
 [node name="Main" type="Node"]
 
@@ -241,18 +240,8 @@ text = "Player 11"
 [node name="NetworkManager" type="Node" parent="."]
 script = ExtResource("1_fnu50")
 
-[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("world", "network_manager", "player_spawner")]
+[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("world", "network_manager")]
 script = ExtResource("5_fo7ky")
 world = NodePath("../World")
 network_manager = NodePath("../NetworkManager")
 player_prefab = ExtResource("6_qj4uo")
-player_spawner = NodePath("PlayerSpawner")
-
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="GameManager"]
-spawn_path = NodePath("../../World")
-
-[node name="ProjectileManager" type="Node" parent="."]
-script = ExtResource("10_ggha3")
-
-[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="ProjectileManager"]
-spawn_path = NodePath("../../World")

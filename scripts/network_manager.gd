@@ -97,6 +97,7 @@ var _readied_player_count: int :
 			if player.readied_up:
 				count += 1
 		return count
+var _connection_approved: bool
 
 
 class NetworkPlayer extends RefCounted:
@@ -162,6 +163,10 @@ func _ready():
 
 
 func join_server(_address: String, _port: int):
+	if _port < 1 or _port > 65535:
+		print("Port is invalid")
+		reset_game()
+		return
 	address = _address
 	port = _port
 	network_players = {}
@@ -190,7 +195,7 @@ func host_server(_port: int) -> bool:
 	game_state = GameState.LOBBY
 	print("Waiting for network_players")
 	if is_player:
-		_on_connected_to_server()
+		_on_connection_to_server_approved([])
 	return true
 
 
@@ -229,6 +234,7 @@ func reset_game():
 	game_state = GameState.IDLE
 	average_rtt_ms = 0
 	server_time_offset_ms = 0
+	_connection_approved = false
 
 
 func _process(delta):
@@ -258,35 +264,55 @@ func _ping_response(start_time: float, _server_time: float):
 	server_time_offset_ms = _server_time + average_rtt_ms - client_time_ms
 
 
-func _on_peer_connected(id: int):
-	print("Peer connected ", id)
-	if multiplayer.is_server():
-		if game_state != GameState.LOBBY:
-			kick_player.rpc_id(id, "Game already in progress")
-			return
-	update_network_player.rpc_id(id, my_network_player.to_dict())
-
-
-func _on_peer_disconnected(id: int):
-	print("Peer disconnected ", id)
-	network_players.erase(id)
-	network_players_updated.emit()
-	
-	if game_state == GameState.IN_GAME:
-		# tODO: Handle quitting mid game gracefully
-		reset_game()
-
-
-func _on_connected_to_server():
-	print("Connected to server")
+@rpc("authority", "call_remote", "reliable")
+func _on_connection_to_server_approved(_network_players: Array):
+	print("Connection to server approved")
+	_connection_approved = true
+	game_state = GameState.LOBBY
+	for network_player: Dictionary in _network_players:
+		var player = NetworkPlayer.from_dict(network_player)
+		network_players[player.multiplayer_id] = player
 	# Send all clients your info
 	var my_network_player = NetworkPlayer.new()
 	my_network_player.multiplayer_id = multiplayer.get_unique_id()
 	my_network_player.readied_up = false
 	my_network_player.username = "Player" + str(multiplayer.get_unique_id())
 	network_players[my_network_player.multiplayer_id] = my_network_player
+	print("connection approved: network_players: ", network_players)
 	update_my_network_player()
 	connected_to_server.emit()
+
+
+func _on_peer_connected(id: int):
+	if not _connection_approved:
+		return
+	print("Peer connected ", id)
+	if multiplayer.is_server():
+		if game_state == GameState.LOBBY:
+			var _network_players = []
+			for player in network_players_list:
+				_network_players.append(player.to_dict())
+			_on_connection_to_server_approved.rpc_id(id, _network_players)
+		else:
+			kick_player.rpc_id(id, "Game already in progress")
+			return
+	update_network_player.rpc_id(id, my_network_player.to_dict())
+
+
+func _on_peer_disconnected(id: int):
+	if not _connection_approved or not id in network_players:
+		return
+	print("Peer disconnected ", id)
+	network_players.erase(id)
+	network_players_updated.emit()
+	
+	if is_server and game_state == GameState.IN_GAME:
+		# tODO: Handle quitting mid game gracefully
+		reset_game()
+
+
+func _on_connected_to_server():
+	print("Connected to server")
 
 
 func _on_connection_failed():

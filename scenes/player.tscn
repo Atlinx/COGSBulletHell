@@ -68,6 +68,8 @@ script = ExtResource("3_0uggd")
 prefix = "Player"
 prefabs = Array[PackedScene]([ExtResource("9_8rhiw")])
 
+[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="ProjectileManager"]
+
 [node name="Health" type="Node" parent="."]
 script = ExtResource("4_x6q3w")
 health = 100

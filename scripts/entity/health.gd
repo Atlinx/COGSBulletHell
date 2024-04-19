@@ -25,10 +25,15 @@ func change_health(amount: int):
 
 
 func damage(amount: int):
-	if is_dead:
+	if is_dead or not multiplayer.is_server():
 		return
 	
-	health -= amount
+	health -= max(amount, 0)
+	damaged.emit(amount)
+	
+	if multiplayer.is_server():
+		_sync_damaged.rpc(amount)
+	
 	if health <= 0:
 		health = 0
 		is_dead = true
@@ -36,10 +41,24 @@ func damage(amount: int):
 
 
 func heal(amount: int):
-	if is_dead:
+	if is_dead or not multiplayer.is_server():
 		return
 	
-	health += amount
-	if health > max_health:
-		health = max_health
+	health += min(amount, max_health)
 	healed.emit(amount)
+	
+	if multiplayer.is_server():
+		_sync_healed.rpc(amount)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _sync_damaged(amount: int):
+	health -= max(amount, 0)
+	damaged.emit(amount)
+	is_dead = health == 0
+
+
+@rpc("authority", "call_remote", "reliable")
+func _sync_healed(amount: int):
+	health += min(amount, max_health)
+	healed.emit()

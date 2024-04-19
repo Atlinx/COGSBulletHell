@@ -12,5 +12,4 @@ func construct(_data: Dictionary):
 	var team = get_node("Team") as Team
 	team.team = data.team
 	team.entity_owner = get_node_or_null(data.entity_owner)
-	constructed.emit(_data)
-	print("  construct proj time: ", NetworkManager.instance.server_time)
+	constructed.emit(data)

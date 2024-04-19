@@ -35,8 +35,10 @@ func _on_host_pressed():
 func _on_join_pressed():
 	_is_joining = true
 	cancel_button.visible = true
-	network_manager.join_server(ip_line_edit.text, int(port_line_edit.text))
 	_set_ui_disabled(true)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	network_manager.join_server(ip_line_edit.text, int(port_line_edit.text))
 
 
 func _on_cancel_pressed():
