@@ -1,0 +1,42 @@
+[gd_scene load_steps=9 format=3 uid="uid://dpnx1vflldwg8"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/projectile.gd" id="1_rotpy"]
+[ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="2_4hngs"]
+[ext_resource type="Script" path="res://scripts/projectiles/forward_projectile_move.gd" id="3_tcfjq"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="3_tkndy"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_applier/hit_once.gd" id="4_clnye"]
+[ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="4_ir47d"]
+[ext_resource type="Script" path="res://scripts/entity/team.gd" id="7_golyg"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kj6p6"]
+radius = 24.0
+
+[node name="BasicBullet" type="Node2D"]
+script = ExtResource("1_rotpy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+self_modulate = Color(1, 0, 0, 1)
+scale = Vector2(0.375, 0.375)
+texture = ExtResource("2_4hngs")
+
+[node name="HitBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("3_tkndy")
+entity = NodePath("..")
+detect_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
+shape = SubResource("CircleShape2D_kj6p6")
+
+[node name="HitOnce" type="Node" parent="HitBox"]
+script = ExtResource("4_clnye")
+damage = 10
+
+[node name="ForwardProjectileMove" type="Node" parent="."]
+script = ExtResource("3_tcfjq")
+speed = 500.0
+
+[node name="Destroy" type="Node2D" parent="."]
+script = ExtResource("4_ir47d")
+
+[node name="Team" type="Node" parent="."]
+script = ExtResource("7_golyg")

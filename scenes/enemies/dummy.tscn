@@ -1,0 +1,51 @@
+[gd_scene load_steps=9 format=3 uid="uid://406t0dudmjjm"]
+
+[ext_resource type="Script" path="res://scripts/entity/team.gd" id="1_3rdq7"]
+[ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_7cfp6"]
+[ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="1_rcyhd"]
+[ext_resource type="Script" path="res://scripts/entity/health.gd" id="2_e3i8c"]
+[ext_resource type="Script" path="res://scripts/entity/overlay_fx.gd" id="3_qp5pn"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="4_xhot2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5001i"]
+shader = ExtResource("1_rcyhd")
+shader_parameter/overlay_color = Color(1, 1, 1, 1)
+shader_parameter/overlay_amount = 0.0
+shader_parameter/alpha_cutoff = 0.5
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rrsmv"]
+radius = 64.0
+
+[node name="Dummy" type="Node2D"]
+
+[node name="Visuals" type="Sprite2D" parent="."]
+self_modulate = Color(1, 0.764706, 0.466667, 1)
+material = SubResource("ShaderMaterial_5001i")
+texture = ExtResource("1_7cfp6")
+
+[node name="OverlayFX" type="Node" parent="Visuals" node_paths=PackedStringArray("visuals")]
+script = ExtResource("3_qp5pn")
+visuals = NodePath("..")
+ease = 1
+transition = 7
+duration = 0.25
+
+[node name="Team" type="Node" parent="." node_paths=PackedStringArray("entity_owner")]
+script = ExtResource("1_3rdq7")
+entity_owner = NodePath("..")
+team = "Enemy"
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2_e3i8c")
+health = 1000000
+max_health = 1000000
+
+[node name="HurtBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("4_xhot2")
+entity = NodePath("..")
+type = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
+shape = SubResource("CircleShape2D_rrsmv")
+
+[connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]

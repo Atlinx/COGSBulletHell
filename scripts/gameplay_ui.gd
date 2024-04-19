@@ -33,9 +33,9 @@ func _update_info_label():
 	else:
 		info_label.text = "Connected @ " + network_manager.address + ":" + str(network_manager.port) + "\n"
 	info_label.text += game_manager.my_player.network_player.username + "\n"
-	info_label.text += "Latency: %.4f ms\n" % network_manager.average_latency
-	info_label.text += "RTT: %.4f ms\n" % network_manager.average_rtt
-	info_label.text += "Time Offset: %.4f ms\n" % network_manager.server_client_time_offset
+	info_label.text += "Latency: %.4f ms\n" % network_manager.average_latency_ms
+	info_label.text += "RTT: %.4f ms\n" % network_manager.average_rtt_ms
+	info_label.text += "Time Offset: %.4f ms\n" % network_manager.server_time_offset_ms
 
 
 func _process(delta):

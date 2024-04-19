@@ -1,18 +1,35 @@
-[gd_scene load_steps=4 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=16 format=3 uid="uid://dwovq5jl3h058"]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_g1jet"]
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
+[ext_resource type="Script" path="res://scripts/entity/player.gd" id="1_vxqq4"]
+[ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="3_0uggd"]
+[ext_resource type="Script" path="res://scripts/entity/overlay_fx.gd" id="3_734co"]
+[ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="3_cy4yu"]
+[ext_resource type="Script" path="res://scripts/entity/health.gd" id="4_x6q3w"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_3w5l7"]
+[ext_resource type="Script" path="res://scripts/entity/team.gd" id="5_qv7pe"]
+[ext_resource type="Script" path="res://scripts/entity/player_shoot.gd" id="8_3mvmw"]
+[ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/basic_bullet.tscn" id="9_8rhiw"]
+[ext_resource type="Script" path="res://scripts/entity/player_input.gd" id="9_u6k5j"]
+[ext_resource type="Script" path="res://scripts/entity/player_move.gd" id="9_v0dwf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1u1l7"]
+shader = ExtResource("3_cy4yu")
+shader_parameter/overlay_color = Color(1, 1, 1, 1)
+shader_parameter/overlay_amount = 0.5
+shader_parameter/alpha_cutoff = 0.5
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vt3h3"]
 radius = 32.0
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera", "visuals", "collision_shape")]
+[sub_resource type="CircleShape2D" id="CircleShape2D_oln88"]
+radius = 32.0624
+
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera")]
 collision_layer = 2
 motion_mode = 1
-script = ExtResource("1_g1jet")
+script = ExtResource("1_vxqq4")
 camera = NodePath("Camera2D")
-visuals = NodePath("Visuals")
-collision_shape = NodePath("CollisionShape2D")
 
 [node name="ActualPosIndicator" type="Sprite2D" parent="."]
 visible = false
@@ -20,10 +37,60 @@ self_modulate = Color(0, 0, 0, 0.211765)
 texture = ExtResource("1_mtwg5")
 
 [node name="Visuals" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_1u1l7")
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_mtwg5")
+
+[node name="OverlayFX" type="Node" parent="Visuals" node_paths=PackedStringArray("visuals")]
+script = ExtResource("3_734co")
+visuals = NodePath("..")
+ease = 1
+transition = 7
+duration = 0.25
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_vt3h3")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="HurtBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("5_3w5l7")
+entity = NodePath("..")
+type = 1
+detect_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
+shape = SubResource("CircleShape2D_oln88")
+debug_color = Color(0.701961, 0, 0, 0.419608)
+
+[node name="ProjectileManager" type="Node" parent="."]
+script = ExtResource("3_0uggd")
+prefix = "Player"
+prefabs = Array[PackedScene]([ExtResource("9_8rhiw")])
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("4_x6q3w")
+health = 100
+max_health = 100
+
+[node name="Team" type="Node" parent="." node_paths=PackedStringArray("entity_owner")]
+script = ExtResource("5_qv7pe")
+entity_owner = NodePath("..")
+team = "Player"
+
+[node name="PlayerShoot" type="Node" parent="." node_paths=PackedStringArray("projectile_manager", "input")]
+script = ExtResource("8_3mvmw")
+projectile_prefab = ExtResource("9_8rhiw")
+projectile_manager = NodePath("../ProjectileManager")
+input = NodePath("../PlayerInput")
+
+[node name="PlayerMove" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "collision_shape")]
+script = ExtResource("9_v0dwf")
+visuals = NodePath("../Visuals")
+input = NodePath("../PlayerInput")
+collision_shape = NodePath("../CollisionShape2D")
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("9_u6k5j")
+
+[connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]

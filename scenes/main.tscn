@@ -1,61 +1,29 @@
-[gd_scene load_steps=11 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=12 format=3 uid="uid://4uh673757wtx"]
 
-[ext_resource type="Script" path="res://scripts/level.gd" id="1_c7rdd"]
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
-[ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_h1ecv"]
+[ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/level.tscn" id="1_negoe"]
 [ext_resource type="Script" path="res://scripts/main_menu_ui.gd" id="1_ok3ni"]
 [ext_resource type="Script" path="res://scripts/menu_manager.gd" id="1_qh41f"]
+[ext_resource type="Script" path="res://scripts/level_manager.gd" id="1_wlfwy"]
 [ext_resource type="Script" path="res://scripts/lobby_ui.gd" id="2_6kl11"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="3_ltb6v"]
 [ext_resource type="Script" path="res://scripts/gameplay_ui.gd" id="4_lewxl"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
 [ext_resource type="PackedScene" uid="uid://dwovq5jl3h058" path="res://scenes/player.tscn" id="6_qj4uo"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_13sao"]
-size = Vector2(128, 128)
+[ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="10_ggha3"]
 
 [node name="Main" type="Node"]
 
-[node name="Level" type="Node2D" parent="." node_paths=PackedStringArray("game_manager")]
-script = ExtResource("1_c7rdd")
+[node name="LevelManager" type="Node2D" parent="." node_paths=PackedStringArray("game_manager")]
+script = ExtResource("1_wlfwy")
+level_prefab = ExtResource("1_negoe")
 game_manager = NodePath("../GameManager")
 disable_collision_for_clients = false
 
-[node name="BG" type="Sprite2D" parent="Level"]
-self_modulate = Color(1, 1, 1, 0.243137)
-scale = Vector2(6.54688, 6.54688)
-texture = ExtResource("1_h1ecv")
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Level"]
-position = Vector2(-291, -13)
-
-[node name="Sprite2D" type="Sprite2D" parent="Level/StaticBody2D"]
-texture = ExtResource("1_h1ecv")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Level/StaticBody2D"]
-shape = SubResource("RectangleShape2D_13sao")
-debug_color = Color(0.235294, 0.913725, 0.156863, 0.419608)
-
-[node name="StaticBody2D2" type="StaticBody2D" parent="Level"]
-position = Vector2(228, -189)
-
-[node name="Sprite2D" type="Sprite2D" parent="Level/StaticBody2D2"]
-texture = ExtResource("1_h1ecv")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Level/StaticBody2D2"]
-shape = SubResource("RectangleShape2D_13sao")
-debug_color = Color(0.235294, 0.913725, 0.156863, 0.419608)
-
-[node name="StaticBody2D3" type="StaticBody2D" parent="Level"]
-position = Vector2(145, 344)
-
-[node name="Sprite2D" type="Sprite2D" parent="Level/StaticBody2D3"]
-texture = ExtResource("1_h1ecv")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Level/StaticBody2D3"]
-shape = SubResource("RectangleShape2D_13sao")
-debug_color = Color(0.235294, 0.913725, 0.156863, 0.419608)
+[node name="Level" parent="LevelManager" instance=ExtResource("1_negoe")]
 
 [node name="World" type="Node2D" parent="."]
+script = ExtResource("3_ltb6v")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -278,7 +246,13 @@ script = ExtResource("5_fo7ky")
 world = NodePath("../World")
 network_manager = NodePath("../NetworkManager")
 player_prefab = ExtResource("6_qj4uo")
-player_spawner = NodePath("../PlayerSpawner")
+player_spawner = NodePath("PlayerSpawner")
 
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
-spawn_path = NodePath("../World")
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="GameManager"]
+spawn_path = NodePath("../../World")
+
+[node name="ProjectileManager" type="Node" parent="."]
+script = ExtResource("10_ggha3")
+
+[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="ProjectileManager"]
+spawn_path = NodePath("../../World")

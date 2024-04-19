@@ -40,27 +40,52 @@ var is_player: bool :
 		return not is_headless_server
 var is_server: bool :
 	get:
-		return multiplayer.is_server()
+		if multiplayer:
+			return multiplayer.is_server()
+		return false
 var can_ready_up: bool :
 	get:
 		return _all_unique_usernames()
-## Round trip time (Two-way delay between client and server) in msecs
-var average_rtt: float
-## One-way delay between client and server in msecs
+
+# SECONDS DATA
+## Round trip time (Two-way delay between client and server) in seconds
+var average_rtt: float :
+	get:
+		return average_rtt / 1000
+## One-way delay between client and server in seconds
 var average_latency: float :
 	get:
-		return average_rtt / 2.0
-## Time of the server in msecs
+		return average_latency_ms / 1000
+## Time of the server in seconds
 var server_time: float :
 	get:
-		return Time.get_ticks_msec() + server_client_time_offset
-## Time of the client in msecs
+		return server_time_ms / 1000
+## Time of the client in seconds
 var client_time: float :
 	get:
-		return Time.get_ticks_msec()
+		return client_time_ms / 1000
+## Offset between server and client time in seconds
+## client_time_ms + server_time_offset_ms = server_time_ms
+var server_time_offset: float :
+	get:
+		return server_time_offset_ms / 1000
+
+# MILLISECONDS DATA (ORIGINAL)
+## Round trip time (Two-way delay between client and server) in msecs
+var average_rtt_ms: float
+## One-way delay between client and server in msecs
+var average_latency_ms: float :
+	get:
+		return average_rtt_ms / 2.0
+## Time of the server in msecs
+var server_time_ms: float :
+	get:
+		return client_time_ms + server_time_offset_ms
+## Time of the client in msecs
+var client_time_ms: float
 ## Offset between server and client time in msecs
-## client_time + server_client_time_offset = server_time
-var server_client_time_offset: float
+## client_time_ms + server_time_offset_ms = server_time_ms
+var server_time_offset_ms: float
 
 
 var _ping_timer: float
@@ -191,8 +216,8 @@ func get_player(player_id: int) -> NetworkPlayer:
 	return network_players[player_id] as NetworkPlayer
 
 
-func client_to_server_time(client_time: float):
-	return client_time + server_client_time_offset
+func client_to_server_time(client_time_ms: float):
+	return client_time_ms + server_time_offset_ms
 
 
 func reset_game():
@@ -202,33 +227,35 @@ func reset_game():
 	network_players.clear()
 	game_reseted.emit()
 	game_state = GameState.IDLE
-	average_rtt = 0
+	average_rtt_ms = 0
+	server_time_offset_ms = 0
 
 
 func _process(delta):
+	client_time_ms += delta * 1000
 	if game_state != GameState.IDLE and not multiplayer.is_server():
 		_ping_timer -= delta
 		if _ping_timer <= 0:
-			_ping.rpc_id(1, Time.get_ticks_msec())
+			_ping.rpc_id(1, client_time_ms)
 			_ping_timer = ping_interval
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func _ping(start_time: float):
-	_ping_response.rpc_id(multiplayer.get_remote_sender_id(), start_time, Time.get_ticks_msec())
+	_ping_response.rpc_id(multiplayer.get_remote_sender_id(), start_time, client_time_ms)
 
 
 @rpc("authority", "call_remote", "reliable")
 func _ping_response(start_time: float, _server_time: float):
-	var end_time = Time.get_ticks_msec()
+	var end_time = client_time_ms
 	_ping_samples.push_back(end_time - start_time)
 	if _ping_samples.size() > ping_sample_count:
 		_ping_samples.remove_at(0)
-	average_rtt = 0
+	average_rtt_ms = 0
 	for sample in _ping_samples:
-		average_rtt += sample
-	average_rtt /= _ping_samples.size()
-	server_client_time_offset = _server_time + average_rtt - client_time
+		average_rtt_ms += sample
+	average_rtt_ms /= _ping_samples.size()
+	server_time_offset_ms = _server_time + average_rtt_ms - client_time_ms
 
 
 func _on_peer_connected(id: int):
