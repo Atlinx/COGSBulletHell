@@ -13,7 +13,7 @@ const MAX_MOVE_AND_SLIDES: int = 10
 ## can deviate from server position at a given latency 
 @export var position_slack_factor: float = 1
 ## Minimum distance of slack the player is given
-@export var position_slack_min: float = 1
+@export var position_slack_min: float = 32
 ## How long it takes for the player 
 ## to start detecting position desyncs
 ## after the player has stopped inputting
@@ -22,7 +22,7 @@ const MAX_MOVE_AND_SLIDES: int = 10
 ## Maximum number of seconds of position desync before
 ## the player is rubberbanded back to their correct position
 @export var position_desync_duration_factor: float = 0.0025
-@export var position_desync_duration_min: float = 0.025
+@export var position_desync_duration_min: float = 0.5
 
 var server_position: Vector2
 var direction: Vector2
@@ -47,6 +47,15 @@ var _is_position_desynced: bool :
 	get:
 		return _position_desync_timer >= 0
 var _is_detecting_position_desyncs: bool
+var _joy_device_id: int :
+	get:
+		if _network_player_index >= 0:
+			var joy_pads = Input.get_connected_joypads()
+			if joy_pads.size() > _network_player_index:
+				return Input.get_connected_joypads()[_network_player_index]
+		return -1
+var _network_player_index: int
+
 
 func construct(_network_player: NetworkManager.NetworkPlayer):
 	network_player = _network_player
@@ -55,6 +64,7 @@ func construct(_network_player: NetworkManager.NetworkPlayer):
 func _ready():
 	network_manager = NetworkManager.instance
 	game_manager = GameManager.instance
+	_network_player_index = network_manager.network_players_sorted_list.find(network_player)
 	game_manager.game_ticked.connect(_on_game_ticked)
 	name = "Player" + str(network_player.multiplayer_id)
 	camera.enabled = is_controlling_player
@@ -124,14 +134,20 @@ func _physics_process(delta):
 	if _is_interpolating:
 		return
 	
-	direction = Input.get_vector("player_left", "player_right", "player_up", "player_down").normalized()
+	var joy_device_id = _joy_device_id
+	if joy_device_id >= 0:
+		direction = Vector2(Input.get_joy_axis(joy_device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(joy_device_id, JOY_AXIS_LEFT_Y))
+		if direction.length_squared() < 0.5 * 0.5:
+			direction = Vector2.ZERO
+	if direction.length_squared() == 0:
+		direction = Input.get_vector("player_left", "player_right", "player_up", "player_down").normalized()
 	velocity = direction * speed
 
 	move_and_slide()
 	
 	if network_manager.is_player_server:
 		server_position = global_position
-	var allowable_position_desync = max(position_slack_factor * network_manager.average_latency, position_slack_min) * game_manager.tick_interval * speed 
+	var allowable_position_desync = max(position_slack_factor * network_manager.average_latency * game_manager.tick_interval * speed, position_slack_min)
 	var dist_to_server_pos = global_position.distance_squared_to(server_position)
 	if direction.length_squared() == 0:
 		if not _is_detecting_position_desyncs and _position_desync_kickin_timer < 0:
@@ -144,7 +160,7 @@ func _physics_process(delta):
 		# If we are not moving, then start desync timer
 		if not _is_position_desynced:
 			# Turn on the desync timer
-			_position_desync_timer = max(position_desync_duration_factor * network_manager.average_latency, position_desync_duration_min) * game_manager.tick_interval * speed
+			_position_desync_timer = max(position_desync_duration_factor * network_manager.average_latency * game_manager.tick_interval * speed, position_desync_duration_min)
 			print("desync_timer set: ", _position_desync_timer, " calc: ", position_desync_duration_factor * network_manager.average_latency * game_manager.tick_interval * speed, " min: ", position_desync_duration_min * game_manager.tick_interval * speed)
 	else:
 		# Turn off the desync timer if we're synced again

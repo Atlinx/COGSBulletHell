@@ -101,6 +101,11 @@ var network_players_list: Array[NetworkPlayer]:
 		var arr: Array[NetworkPlayer] = []
 		arr.assign(network_players.values())
 		return arr
+var network_players_sorted_list: Array[NetworkPlayer]:
+	get:
+		var _network_players_list = network_players_list
+		_network_players_list.sort_custom(func (a: NetworkManager.NetworkPlayer, b: NetworkManager.NetworkPlayer): return a.multiplayer_id < b.multiplayer_id)
+		return _network_players_list
 var my_network_player: NetworkPlayer:
 	get:
 		return network_players[multiplayer.get_unique_id()]
