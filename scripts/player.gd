@@ -2,31 +2,38 @@ class_name Player
 extends CharacterBody2D
 
 
-@export var speed: float = 100;
+const MAX_MOVE_AND_SLIDES: int = 10
+
+
+@export var speed: float = 500;
 @export var camera: Camera2D
-@export var sync_interval: float = 1/10.0
-@export var interpolate_factor: float = 1
-@export var interpolate_curve: Curve
+@export var visuals: Sprite2D
+@export var collision_shape: CollisionShape2D
 ## Factor that contorls How much player's position
 ## can deviate from server position at a given latency 
-@export var position_slack_factor: float = 64
+@export var position_slack_factor: float = 1
 ## Minimum distance of slack the player is given
-@export var position_slack_min: float = 32
+@export var position_slack_min: float = 1
+## How long it takes for the player 
+## to start detecting position desyncs
+## after the player has stopped inputting
+## a direction
+@export var position_desync_kickin_duration: float = 1.0
 ## Maximum number of seconds of position desync before
 ## the player is rubberbanded back to their correct position
-@export var position_desync_duration: float = 5
+@export var position_desync_duration_factor: float = 0.0025
+@export var position_desync_duration_min: float = 0.025
 
 var server_position: Vector2
 var direction: Vector2
 
 var network_player: NetworkManager.NetworkPlayer
 var network_manager: NetworkManager
+var game_manager: GameManager
 var is_controlling_player: bool :
 	get:
 		return network_player.multiplayer_id == multiplayer.get_unique_id()
 
-var _sync_timer: float = 0
-var _interpolate_tween: Tween
 var _interpolate_timer: float = -1
 var _interpolate_duration: float
 var _interpolate_dest: Vector2
@@ -34,7 +41,12 @@ var _interpolate_start_pos: Vector2
 var _is_interpolating: bool :
 	get:
 		return _interpolate_timer > 0
-
+var _position_desync_kickin_timer: float = -1
+var _position_desync_timer: float = -1
+var _is_position_desynced: bool :
+	get:
+		return _position_desync_timer >= 0
+var _is_detecting_position_desyncs: bool
 
 func construct(_network_player: NetworkManager.NetworkPlayer):
 	network_player = _network_player
@@ -42,38 +54,67 @@ func construct(_network_player: NetworkManager.NetworkPlayer):
 
 func _ready():
 	network_manager = NetworkManager.instance
+	game_manager = GameManager.instance
+	game_manager.game_ticked.connect(_on_game_ticked)
 	name = "Player" + str(network_player.multiplayer_id)
 	camera.enabled = is_controlling_player
 	set_physics_process(is_controlling_player)
+	# We want to give the collision shape some
+	# leeway if we're the server in charge of simulating
+	# the game state.
+	#
+	# However if we are also controlling a player as the
+	# server, we don't want to give our own player leeway
+	if network_manager.is_headless_server or (not is_controlling_player and network_manager.is_player_server):
+		(collision_shape.shape as CircleShape2D).radius *= 0.9
 	if not is_controlling_player:
+		if not network_manager.is_server:
+			# If we are not controlling the player and are not the server,
+			# we don't need to worry about the collision of other players 
+			collision_shape.disabled = true
 		_start_interpolate_to_server_pos()
 
 
 func _start_interpolate_to_server_pos():
-	var dist_to_dest = global_position.distance_to(server_position)
-	if dist_to_dest > 0.01:
-		_interpolate_start_pos = global_position
+	var start_pos = visuals.global_position if network_manager.is_player_server else global_position
+	var dist_to_dest = start_pos.distance_to(server_position)
+	if dist_to_dest > 0:
+		_interpolate_start_pos = start_pos
 		_interpolate_dest = server_position
-		_interpolate_duration = dist_to_dest / 128.0 * sync_interval * interpolate_factor
-		print("interpolate duration: ", _interpolate_duration)
+		_interpolate_duration = game_manager.tick_interval
 		_interpolate_timer = _interpolate_duration
 
 
+func _on_game_ticked():
+	if multiplayer.is_server():
+		_sync_to_clients.rpc(global_position, direction)
+	elif network_manager.is_player and is_controlling_player:
+		_sync_to_server.rpc_id(1, global_position, direction)
+
+
 func _process(delta):
-	if _sync_timer >= 0:
-		_sync_timer -= delta
-		if _sync_timer < 0:
-			_sync_timer = sync_interval	
-			if multiplayer.is_server():
-				_sync_to_clients.rpc(server_position, direction)
-			elif network_manager.is_player and is_controlling_player:
-				_sync_to_server.rpc_id(1, global_position, direction)
 	if _interpolate_timer >= 0:
 		_interpolate_timer -= delta
-		var amount = interpolate_curve.sample(1.0 - _interpolate_timer / _interpolate_duration)
-		global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
+		var amount = clampf(1.0 - _interpolate_timer / _interpolate_duration, 0.0, 1.0)
+		if network_manager.is_player_server and not is_controlling_player:
+			visuals.global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
+		else:
+			global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
 		if _interpolate_timer < 0:
-			global_position = _interpolate_dest
+			if network_manager.is_player_server and not is_controlling_player:
+				visuals.global_position = _interpolate_dest
+			else:
+				global_position = _interpolate_dest
+	if _position_desync_kickin_timer >= 0:
+		_position_desync_kickin_timer -= delta
+		if _position_desync_kickin_timer < 0:
+			_is_detecting_position_desyncs = true
+	if _position_desync_timer >= 0:
+		_position_desync_timer -= delta
+		if _position_desync_timer < 0:
+			## Force a resync if we desync too much
+			print("Force resync: Position desync for too long")
+			_start_interpolate_to_server_pos()
 
 
 func _physics_process(delta):
@@ -88,20 +129,56 @@ func _physics_process(delta):
 
 	move_and_slide()
 	
-	var allowable_position_desync = max(position_slack_factor * network_manager.average_latency, position_slack_min * sync_interval) * speed 
-	if global_position.distance_squared_to(server_position) > allowable_position_desync * allowable_position_desync:
-		print("Forced desync")
+	if network_manager.is_player_server:
+		server_position = global_position
+	var allowable_position_desync = max(position_slack_factor * network_manager.average_latency, position_slack_min) * game_manager.tick_interval * speed 
+	var dist_to_server_pos = global_position.distance_squared_to(server_position)
+	if direction.length_squared() == 0:
+		if not _is_detecting_position_desyncs and _position_desync_kickin_timer < 0:
+			_position_desync_kickin_timer = position_desync_kickin_duration
+	elif (_is_detecting_position_desyncs or _position_desync_kickin_timer > 0):
+		# If we started doing inputs again, then we stop detecting position desyncs
+		_is_detecting_position_desyncs = false
+		_position_desync_kickin_timer = -1
+	if _is_detecting_position_desyncs and dist_to_server_pos > 0.01:
+		# If we are not moving, then start desync timer
+		if not _is_position_desynced:
+			# Turn on the desync timer
+			_position_desync_timer = max(position_desync_duration_factor * network_manager.average_latency, position_desync_duration_min) * game_manager.tick_interval * speed
+			print("desync_timer set: ", _position_desync_timer, " calc: ", position_desync_duration_factor * network_manager.average_latency * game_manager.tick_interval * speed, " min: ", position_desync_duration_min * game_manager.tick_interval * speed)
+	else:
+		# Turn off the desync timer if we're synced again
+		_position_desync_timer = -1
+	if dist_to_server_pos > allowable_position_desync * allowable_position_desync:
+		print("Force resync: Position dist > allowable desync")
 		## Force a resync if we desync too much
 		_start_interpolate_to_server_pos()
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func _sync_to_server(source_position: Vector2, source_direction: Vector2):
-	print("sync to server: ", name, " : ", source_position)
-	server_position = global_position
 	var motion = source_position - global_position
-	move_and_collide(motion)
+	var orig_visual_position = visuals.global_position
+	var collision = move_and_collide(motion)
+	var slide_count = 0
+	while collision and collision.get_remainder().length_squared() > 0 and slide_count < MAX_MOVE_AND_SLIDES: 
+		var angle = collision.get_normal().angle_to(motion)
+		if angle == 0:
+			break
+		elif sign(angle) > 0:
+			angle = deg_to_rad(90) - angle
+		else:
+			angle = deg_to_rad(-90) - angle
+		motion = collision.get_remainder().rotated(angle)
+		#print("motion angle: ", rad_to_deg(motion.angle()), " remainder angle: ", rad_to_deg(collision.get_remainder().angle()))
+		#motion = collision.get_remainder()
+		collision = move_and_collide(motion)
+		slide_count += 1
+	server_position = global_position
 	direction = source_direction
+	if network_manager.is_player_server:
+		visuals.global_position = orig_visual_position
+		_start_interpolate_to_server_pos()
 
 
 @rpc("authority", "call_remote", "reliable")

@@ -31,10 +31,16 @@ static var instance: NetworkManager
 var peer: ENetMultiplayerPeer
 var game_state: GameState = GameState.IDLE
 
-var is_headless: bool = false
+var is_player_server: bool :
+	get:
+		return is_player and is_server
+var is_headless_server: bool = false
 var is_player: bool :
 	get:
-		return not is_headless
+		return not is_headless_server
+var is_server: bool :
+	get:
+		return multiplayer.is_server()
 var can_ready_up: bool :
 	get:
 		return _all_unique_usernames()
@@ -110,8 +116,8 @@ func _enter_tree():
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
-	is_headless = "--server" in OS.get_cmdline_args()
-	if is_headless:
+	is_headless_server = "--server" in OS.get_cmdline_args()
+	if is_headless_server:
 		host_server(port)
 
 
@@ -188,7 +194,6 @@ func reset_game():
 	if peer and peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 		peer.close()
 	peer = null
-	multiplayer.set_multiplayer_peer(null)
 	network_players.clear()
 	game_reseted.emit()
 	game_state = GameState.IDLE
