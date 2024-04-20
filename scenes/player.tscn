@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=19 format=3 uid="uid://dwovq5jl3h058"]
 
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
 [ext_resource type="Script" path="res://scripts/entity/player.gd" id="1_vxqq4"]
@@ -6,12 +6,15 @@
 [ext_resource type="Script" path="res://scripts/entity/overlay_fx.gd" id="3_734co"]
 [ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="3_cy4yu"]
 [ext_resource type="Script" path="res://scripts/entity/health.gd" id="4_x6q3w"]
+[ext_resource type="Texture2D" uid="uid://qtewcrkj6odu" path="res://assets/art/player/wizard.png" id="4_xp1qm"]
 [ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_3w5l7"]
 [ext_resource type="Script" path="res://scripts/entity/team.gd" id="5_qv7pe"]
 [ext_resource type="Script" path="res://scripts/entity/player_shoot.gd" id="8_3mvmw"]
 [ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/basic_bullet.tscn" id="9_8rhiw"]
 [ext_resource type="Script" path="res://scripts/entity/player_input.gd" id="9_u6k5j"]
 [ext_resource type="Script" path="res://scripts/entity/player_move.gd" id="9_v0dwf"]
+[ext_resource type="AnimationLibrary" uid="uid://k8m0bt6tielb" path="res://assets/animations/player_anim.tres" id="14_l8bn7"]
+[ext_resource type="Script" path="res://scripts/entity/player_animation_player.gd" id="15_0wowu"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1u1l7"]
 shader = ExtResource("3_cy4yu")
@@ -23,7 +26,7 @@ shader_parameter/alpha_cutoff = 0.5
 radius = 32.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_oln88"]
-radius = 32.0624
+radius = 32.0
 
 [node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera")]
 collision_layer = 2
@@ -38,8 +41,7 @@ texture = ExtResource("1_mtwg5")
 
 [node name="Visuals" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_1u1l7")
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_mtwg5")
+texture = ExtResource("4_xp1qm")
 
 [node name="OverlayFX" type="Node" parent="Visuals" node_paths=PackedStringArray("visuals")]
 script = ExtResource("3_734co")
@@ -94,5 +96,12 @@ collision_shape = NodePath("../CollisionShape2D")
 
 [node name="PlayerInput" type="Node" parent="."]
 script = ExtResource("9_u6k5j")
+
+[node name="PlayerAnimationPlayer" type="AnimationPlayer" parent="." node_paths=PackedStringArray("player_move")]
+libraries = {
+"": ExtResource("14_l8bn7")
+}
+script = ExtResource("15_0wowu")
+player_move = NodePath("../PlayerMove")
 
 [connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]

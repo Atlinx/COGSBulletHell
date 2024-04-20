@@ -5,6 +5,9 @@ extends Node
 const MAX_MOVE_AND_SLIDES: int = 10
 
 
+signal is_moving_changed(moving: bool)
+
+
 @export var speed: float = 500;
 @export var visuals: Sprite2D
 @export var input: PlayerInput
@@ -23,11 +26,22 @@ const MAX_MOVE_AND_SLIDES: int = 10
 ## the player is rubberbanded back to their correct position
 @export var position_desync_duration_factor: float = 0.0025
 @export var position_desync_duration_min: float = 0.5
+## How long until the player is considered to be no longer moving
+@export var stop_moving_duration_factor: float = 0.1
+@export var stop_moving_duration_min: float = 0.25
 
 @onready var player: Player = get_parent()
 
 var server_position: Vector2
 var direction: Vector2
+var is_moving: bool :
+	get:
+		return is_moving
+	set(value):
+		var old = is_moving
+		is_moving = value
+		if old != is_moving:
+			is_moving_changed.emit(is_moving)
 
 var network_manager: NetworkManager
 var game_manager: GameManager
@@ -45,6 +59,9 @@ var _is_position_desynced: bool :
 	get:
 		return _position_desync_timer >= 0
 var _is_detecting_position_desyncs: bool
+var _stop_moving_timer: float
+## Is the direction != Vector2.ZERO?
+var _is_direction_inputted: bool
 
 
 func _ready():
@@ -71,7 +88,8 @@ func _ready():
 func _start_interpolate_to_server_pos():
 	var start_pos = visuals.global_position if network_manager.is_player_server else player.global_position
 	var dist_to_dest = start_pos.distance_to(server_position)
-	if dist_to_dest > 0:
+	if dist_to_dest > 2:
+		is_moving = true
 		_interpolate_start_pos = start_pos
 		_interpolate_dest = server_position
 		_interpolate_duration = game_manager.tick_interval
@@ -98,6 +116,12 @@ func _process(delta):
 				visuals.global_position = _interpolate_dest
 			else:
 				player.global_position = _interpolate_dest
+			_stop_moving_timer = max(stop_moving_duration_factor * network_manager.average_latency_ms, stop_moving_duration_min)
+			print(stop_moving_duration_factor * network_manager.average_latency_ms, " vs. ", stop_moving_duration_min)
+	if _stop_moving_timer >= 0:
+		_stop_moving_timer -= delta
+		if _stop_moving_timer < 0:
+			is_moving = false
 	if _position_desync_kickin_timer >= 0:
 		_position_desync_kickin_timer -= delta
 		if _position_desync_kickin_timer < 0:
@@ -129,10 +153,16 @@ func _physics_process(delta):
 	if direction.length_squared() == 0:
 		if not _is_detecting_position_desyncs and _position_desync_kickin_timer < 0:
 			_position_desync_kickin_timer = position_desync_kickin_duration
-	elif (_is_detecting_position_desyncs or _position_desync_kickin_timer > 0):
-		# If we started doing inputs again, then we stop detecting position desyncs
-		_is_detecting_position_desyncs = false
-		_position_desync_kickin_timer = -1
+		if _is_direction_inputted:
+			_is_direction_inputted = false
+			is_moving = false
+	else:
+		_is_direction_inputted = true
+		is_moving = true
+		if (_is_detecting_position_desyncs or _position_desync_kickin_timer > 0):
+			# If we started doing inputs again, then we stop detecting position desyncs
+			_is_detecting_position_desyncs = false
+			_position_desync_kickin_timer = -1
 	if _is_detecting_position_desyncs and dist_to_server_pos > 0.01:
 		# If we are not moving, then start desync timer
 		if not _is_position_desynced:

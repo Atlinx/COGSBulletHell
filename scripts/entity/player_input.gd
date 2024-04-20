@@ -85,6 +85,6 @@ func _process(delta):
 	if mode == Mode.MOUSE_KEYBOARD:
 		aim_direction = (player.get_global_mouse_position() - player.global_position).normalized()
 	else:
-		var stick_direction = Vector2(Input.get_joy_axis(joy_device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(joy_device_id, JOY_AXIS_LEFT_Y))
+		var stick_direction = Vector2(Input.get_joy_axis(joy_device_id, JOY_AXIS_RIGHT_X), Input.get_joy_axis(joy_device_id, JOY_AXIS_RIGHT_Y))
 		if stick_direction.length_squared() > 0.5 * 0.5:
 			aim_direction = stick_direction.normalized()
