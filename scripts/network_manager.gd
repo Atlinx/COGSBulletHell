@@ -334,6 +334,8 @@ func ready_up():
 	get_player(readied_player_id).readied_up = true
 	network_players_updated.emit()
 	if multiplayer.is_server() and _readied_player_count == network_players.size() and _all_unique_usernames():
+		# Make sure the server always starts first
+		start_game()
 		start_game.rpc()
 
 
@@ -346,7 +348,7 @@ func _all_unique_usernames():
 	return true
 
 
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_remote", "reliable")
 func start_game():
 	print("Game started")
 	game_state = GameState.IN_GAME

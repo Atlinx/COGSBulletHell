@@ -17,12 +17,16 @@ func _ready():
 
 
 func destroy():
-	_destroy.rpc()
+	_destroy.rpc(global_position)
 
 
 @rpc("authority", "call_local", "reliable")
-func _destroy():
+func _destroy(death_position: Vector2):
 	if not _is_destroyed:
+		global_position = death_position
+		for child in get_children():
+			if child is FX:
+				child.play()
 		_is_destroyed = true
 		destroyed.emit()
 		get_parent().queue_free.call_deferred()

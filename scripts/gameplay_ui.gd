@@ -6,6 +6,8 @@ extends Control
 @export var game_manager: GameManager
 @export var info_label: Label
 @export var disconnect_button: Button
+@export var scoreboard_entry_prefab: PackedScene
+@export var scoreboard: Control
 
 
 func _ready():
@@ -20,11 +22,18 @@ func _on_disconnect_pressed():
 
 func _on_reseted():
 	visible = false
+	for child in scoreboard.get_children():
+		child.queue_free()
 
 
 func _on_game_started():
 	visible = true
 	_update_info_label()
+	for player in game_manager.game_players_list:
+		var scoreboard_entry_inst = scoreboard_entry_prefab.instantiate() as ScoreboardEntry
+		scoreboard.add_child(scoreboard_entry_inst)
+		scoreboard_entry_inst.construct(player)
+	
 
 
 func _update_info_label():
@@ -32,7 +41,7 @@ func _update_info_label():
 		info_label.text = "Hosting @ " + str(network_manager.port) + "\n"
 	else:
 		info_label.text = "Connected @ " + network_manager.address + ":" + str(network_manager.port) + "\n"
-	info_label.text += game_manager.my_player.network_player.username + "\n"
+	info_label.text += network_manager.my_network_player.username + "\n"
 	info_label.text += "Latency: %.4f ms\n" % network_manager.average_latency_ms
 	info_label.text += "RTT: %.4f ms\n" % network_manager.average_rtt_ms
 	info_label.text += "Time Offset: %.4f ms\n" % network_manager.server_time_offset_ms

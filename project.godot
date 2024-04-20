@@ -19,11 +19,16 @@ config/icon="res://icon.svg"
 
 multirun/number_of_windows=2
 multirun/add_custom_args=true
-multirun/window_args=["--position 1920,40 --resolution 720x405", "--position 2640,40 --resolution 720x405"]
+multirun/window_args=["--position 0,40 --resolution 720x405", "--position 720,40 --resolution 720x405"]
+
+[display]
+
+window/stretch/mode="viewport"
+window/stretch/aspect="keep_width"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/multirun/plugin.cfg")
+enabled=PackedStringArray("res://addons/multirun/plugin.cfg", "res://addons/rmsmartshape/plugin.cfg")
 
 [input]
 

@@ -33,7 +33,6 @@ signal is_moving_changed(moving: bool)
 @onready var player: Player = get_parent()
 
 var server_position: Vector2
-var direction: Vector2
 var is_moving: bool :
 	get:
 		return is_moving
@@ -68,6 +67,7 @@ func _ready():
 	network_manager = NetworkManager.instance
 	game_manager = GameManager.instance
 	game_manager.game_ticked.connect(_on_game_ticked)
+	server_position = player.global_position
 	set_physics_process(player.is_controlling_player)
 	# We want to give the collision shape some
 	# leeway if we're the server in charge of simulating
@@ -98,9 +98,9 @@ func _start_interpolate_to_server_pos():
 
 func _on_game_ticked():
 	if multiplayer.is_server():
-		_sync_to_clients.rpc(player.global_position, direction)
+		_sync_to_clients.rpc(player.global_position)
 	elif network_manager.is_player and player.is_controlling_player:
-		_sync_to_server.rpc_id(1, player.global_position, direction)
+		_sync_to_server.rpc_id(1, player.global_position)
 
 
 func _process(delta):	
@@ -117,7 +117,6 @@ func _process(delta):
 			else:
 				player.global_position = _interpolate_dest
 			_stop_moving_timer = max(stop_moving_duration_factor * network_manager.average_latency_ms, stop_moving_duration_min)
-			print(stop_moving_duration_factor * network_manager.average_latency_ms, " vs. ", stop_moving_duration_min)
 	if _stop_moving_timer >= 0:
 		_stop_moving_timer -= delta
 		if _stop_moving_timer < 0:
@@ -141,7 +140,7 @@ func _physics_process(delta):
 	if _is_interpolating:
 		return
 	
-	direction = input.move_direction
+	var direction = input.move_direction
 	player.velocity = direction * speed
 
 	player.move_and_slide()
@@ -172,13 +171,13 @@ func _physics_process(delta):
 		# Turn off the desync timer if we're synced again
 		_position_desync_timer = -1
 	if dist_to_server_pos > allowable_position_desync * allowable_position_desync:
-		print("Force Sync: dist_to_server_pos > allowable_position_desync")
+		print("Force Sync: dist_to_server_pos > allowable_position_desync", dist_to_server_pos, " server pos: ", server_position, " player pos: ", player.global_position)
 		## Force a resync if we desync too much
 		_start_interpolate_to_server_pos()
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _sync_to_server(source_position: Vector2, source_direction: Vector2):
+func _sync_to_server(source_position: Vector2):
 	var motion = source_position - player.global_position
 	var orig_visual_position = visuals.global_position
 	var collision = player.move_and_collide(motion)
@@ -197,15 +196,13 @@ func _sync_to_server(source_position: Vector2, source_direction: Vector2):
 		collision = player.move_and_collide(motion)
 		slide_count += 1
 	server_position = player.global_position
-	direction = source_direction
 	if network_manager.is_player_server:
 		visuals.global_position = orig_visual_position
 		_start_interpolate_to_server_pos()
 
 
 @rpc("authority", "call_remote", "reliable")
-func _sync_to_clients(source_position: Vector2, source_direction: Vector2):
+func _sync_to_clients(source_position: Vector2):
 	server_position = source_position
 	if not player.is_controlling_player:
-		direction = source_direction
 		_start_interpolate_to_server_pos()

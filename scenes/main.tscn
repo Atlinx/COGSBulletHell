@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=15 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/level.tscn" id="1_negoe"]
@@ -10,6 +10,22 @@
 [ext_resource type="Script" path="res://scripts/gameplay_ui.gd" id="4_lewxl"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
 [ext_resource type="PackedScene" uid="uid://dwovq5jl3h058" path="res://scenes/player.tscn" id="6_qj4uo"]
+[ext_resource type="PackedScene" uid="uid://cn7aloedpuwjr" path="res://scenes/ui/scoreboard_entry.tscn" id="8_y3w7w"]
+[ext_resource type="Script" path="res://scripts/color_palette.gd" id="11_psfxx"]
+
+[sub_resource type="Resource" id="Resource_j8oq4"]
+script = ExtResource("11_psfxx")
+color_1 = Color(0.984314, 0.188235, 0.188235, 1)
+color_2 = Color(0.772549, 0.215686, 0.215686, 1)
+color_3 = Color(0.407843, 0.192157, 0.192157, 1)
+color_4 = Color(0, 0, 0, 1)
+
+[sub_resource type="Resource" id="Resource_1k23g"]
+script = ExtResource("11_psfxx")
+color_1 = Color(0.290196, 0.835294, 1, 1)
+color_2 = Color(0.294118, 0.643137, 0.796078, 1)
+color_3 = Color(0.2, 0.345098, 0.501961, 1)
+color_4 = Color(0, 0, 0, 1)
 
 [node name="Main" type="Node"]
 
@@ -18,6 +34,9 @@ script = ExtResource("1_wlfwy")
 level_prefab = ExtResource("1_negoe")
 game_manager = NodePath("../GameManager")
 disable_collision_for_clients = false
+
+[node name="WorldCamera2D" type="Camera2D" parent="LevelManager"]
+zoom = Vector2(0.1, 0.1)
 
 [node name="Level" parent="LevelManager" instance=ExtResource("1_negoe")]
 
@@ -79,7 +98,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "COGS Bullet Hell"
+text = "Wizard Battle"
 
 [node name="HSplitContainer" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -167,7 +186,7 @@ theme_override_constants/separation = 16
 
 [node name="Label" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
 layout_mode = 2
-text = "COGS Bullet Hell Lobby"
+text = "Wizard Battle Lobby"
 
 [node name="LobbyInfoLabel" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
 layout_mode = 2
@@ -203,7 +222,7 @@ text = "Ready"
 layout_mode = 2
 text = "Leave"
 
-[node name="GameplayUI" type="Control" parent="UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button")]
+[node name="GameplayUI" type="Control" parent="UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button", "scoreboard")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -215,6 +234,8 @@ network_manager = NodePath("../../NetworkManager")
 game_manager = NodePath("../../GameManager")
 info_label = NodePath("MarginContainer/VBoxContainer/InfoLabel")
 disconnect_button = NodePath("MarginContainer/VBoxContainer/DisconnectButton")
+scoreboard_entry_prefab = ExtResource("8_y3w7w")
+scoreboard = NodePath("MarginContainer2/VBoxContainer/ScoreboardContainer")
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/GameplayUI"]
 layout_mode = 0
@@ -237,11 +258,39 @@ text = "Disconnect"
 layout_mode = 2
 text = "Player 11"
 
+[node name="MarginContainer2" type="MarginContainer" parent="UI/GameplayUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -232.0
+offset_bottom = 90.0
+grow_horizontal = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameplayUI/MarginContainer2"]
+layout_mode = 2
+
+[node name="InfoLabel" type="Label" parent="UI/GameplayUI/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Scoreboard"
+
+[node name="ScoreboardContainer" type="VBoxContainer" parent="UI/GameplayUI/MarginContainer2/VBoxContainer"]
+layout_mode = 2
+
+[node name="HSplitContainer" parent="UI/GameplayUI/MarginContainer2/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
+layout_mode = 2
+
 [node name="NetworkManager" type="Node" parent="."]
 script = ExtResource("1_fnu50")
 
-[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("world", "network_manager")]
+[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("world", "network_manager", "level_manager")]
 script = ExtResource("5_fo7ky")
 world = NodePath("../World")
 network_manager = NodePath("../NetworkManager")
+level_manager = NodePath("../LevelManager")
 player_prefab = ExtResource("6_qj4uo")
+color_palettes = Array[ExtResource("11_psfxx")]([SubResource("Resource_j8oq4"), SubResource("Resource_1k23g")])

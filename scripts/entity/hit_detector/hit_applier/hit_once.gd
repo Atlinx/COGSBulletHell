@@ -15,7 +15,4 @@ func _on_detector_entered(other_detector: HitDetector):
 		already_hit[other_detector] = null
 		var health = other_detector.entity.get_node_or_null("Health") as Health
 		if health:
-			if is_healing:
-				health.heal(damage)
-			else:
-				health.damage(damage)
+			health.use_damage_info(get_damage_info())

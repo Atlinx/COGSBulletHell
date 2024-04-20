@@ -2,6 +2,9 @@ class_name ProjectileManager
 extends Node
 
 
+signal on_spawn
+
+
 @export var prefix: String
 @export var use_parent_team: bool = true
 @export var prefabs: Array[PackedScene]
@@ -56,3 +59,4 @@ func _spawn_projectile_clients(data: Dictionary):
 	world.add_child(inst)
 	inst.construct(data)
 	counter += 1
+	on_spawn.emit()

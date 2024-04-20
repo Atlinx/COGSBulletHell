@@ -1,38 +1,99 @@
-[gd_scene load_steps=19 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=31 format=3 uid="uid://dwovq5jl3h058"]
 
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
 [ext_resource type="Script" path="res://scripts/entity/player.gd" id="1_vxqq4"]
 [ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="3_0uggd"]
+[ext_resource type="Shader" path="res://assets/shaders/recolor_overlay.gdshader" id="3_1mnd0"]
 [ext_resource type="Script" path="res://scripts/entity/overlay_fx.gd" id="3_734co"]
-[ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="3_cy4yu"]
 [ext_resource type="Script" path="res://scripts/entity/health.gd" id="4_x6q3w"]
 [ext_resource type="Texture2D" uid="uid://qtewcrkj6odu" path="res://assets/art/player/wizard.png" id="4_xp1qm"]
 [ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_3w5l7"]
 [ext_resource type="Script" path="res://scripts/entity/team.gd" id="5_qv7pe"]
+[ext_resource type="Script" path="res://scripts/fx.gd" id="7_c6snw"]
 [ext_resource type="Script" path="res://scripts/entity/player_shoot.gd" id="8_3mvmw"]
+[ext_resource type="Texture2D" uid="uid://b05q2b0cgv3rx" path="res://assets/art/fx/64_circle_fx.png" id="8_syjy0"]
 [ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/basic_bullet.tscn" id="9_8rhiw"]
+[ext_resource type="Script" path="res://scripts/entity/advanced_gpu_particles_2d.gd" id="9_kxbcm"]
+[ext_resource type="Texture2D" uid="uid://dmr5w4svu0bxn" path="res://assets/art/fx/16_circle_fx.png" id="9_mqncq"]
 [ext_resource type="Script" path="res://scripts/entity/player_input.gd" id="9_u6k5j"]
 [ext_resource type="Script" path="res://scripts/entity/player_move.gd" id="9_v0dwf"]
 [ext_resource type="AnimationLibrary" uid="uid://k8m0bt6tielb" path="res://assets/animations/player_anim.tres" id="14_l8bn7"]
 [ext_resource type="Script" path="res://scripts/entity/player_animation_player.gd" id="15_0wowu"]
+[ext_resource type="Script" path="res://scripts/entity/palette_swap.gd" id="18_lmg5v"]
+[ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="21_l70jj"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1u1l7"]
-shader = ExtResource("3_cy4yu")
+shader = ExtResource("3_1mnd0")
+shader_parameter/original_0 = Color(0, 0, 0, 0)
+shader_parameter/original_1 = Color(0.231373, 0.368627, 0.631373, 1)
+shader_parameter/original_2 = Color(0.184314, 0.203922, 0.380392, 1)
+shader_parameter/original_3 = Color(0, 0, 0, 0)
+shader_parameter/replace_0 = Color(0, 0, 0, 0)
+shader_parameter/replace_1 = Color(0.231373, 0.368627, 0.631373, 1)
+shader_parameter/replace_2 = Color(0.184314, 0.203922, 0.380392, 1)
+shader_parameter/replace_3 = Color(0, 0, 0, 0)
+shader_parameter/precision = 0.05
 shader_parameter/overlay_color = Color(1, 1, 1, 1)
-shader_parameter/overlay_amount = 0.5
+shader_parameter/overlay_amount = 0.0
 shader_parameter/alpha_cutoff = 0.5
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vt3h3"]
 radius = 32.0
 
+[sub_resource type="Curve" id="Curve_7ocbx"]
+_data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_d107c"]
+curve = SubResource("Curve_7ocbx")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_j0y11"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+initial_velocity_min = 250.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 70.0
+damping_max = 70.0
+scale_curve = SubResource("CurveTexture_d107c")
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_oln88"]
 radius = 32.0
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera")]
+[sub_resource type="Curve" id="Curve_qcomm"]
+_data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_m5qes"]
+curve = SubResource("Curve_qcomm")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_3aj3w"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+spread = 180.0
+initial_velocity_min = 250.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 70.0
+damping_max = 70.0
+scale_curve = SubResource("CurveTexture_m5qes")
+
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera", "palette_swap", "team", "health")]
 collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_vxqq4")
 camera = NodePath("Camera2D")
+palette_swap = NodePath("PlayerPaletteSwap")
+team = NodePath("Team")
+health = NodePath("Health")
 
 [node name="ActualPosIndicator" type="Sprite2D" parent="."]
 visible = false
@@ -51,11 +112,38 @@ transition = 7
 duration = 0.25
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 shape = SubResource("CircleShape2D_vt3h3")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
+[node name="FireRotation" type="Node2D" parent="."]
+
+[node name="Muzzle" type="Node2D" parent="FireRotation"]
+position = Vector2(27, 0)
+
+[node name="ShootFX" type="Node2D" parent="FireRotation/Muzzle"]
+script = ExtResource("7_c6snw")
+
+[node name="ShootGPUParticles2D" type="GPUParticles2D" parent="FireRotation/Muzzle/ShootFX"]
+self_modulate = Color(0.262745, 0.658824, 0.894118, 1)
+z_index = 10
+emitting = false
+amount = 3
+process_material = SubResource("ParticleProcessMaterial_j0y11")
+texture = ExtResource("8_syjy0")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.8
+script = ExtResource("9_kxbcm")
+repeat_oneshot = true
+
+[node name="Sprite2D" type="Sprite2D" parent="FireRotation/Muzzle"]
+self_modulate = Color(1, 1, 1, 0.313726)
+texture = ExtResource("9_mqncq")
+
 [node name="HurtBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+visible = false
 script = ExtResource("5_3w5l7")
 entity = NodePath("..")
 type = 1
@@ -82,11 +170,14 @@ script = ExtResource("5_qv7pe")
 entity_owner = NodePath("..")
 team = "Player"
 
-[node name="PlayerShoot" type="Node" parent="." node_paths=PackedStringArray("projectile_manager", "input")]
+[node name="PlayerShoot" type="Node" parent="." node_paths=PackedStringArray("projectile_manager", "visuals", "input", "fire_rotation", "muzzle")]
 script = ExtResource("8_3mvmw")
 projectile_prefab = ExtResource("9_8rhiw")
 projectile_manager = NodePath("../ProjectileManager")
+visuals = NodePath("../Visuals")
 input = NodePath("../PlayerInput")
+fire_rotation = NodePath("../FireRotation")
+muzzle = NodePath("../FireRotation/Muzzle")
 
 [node name="PlayerMove" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "collision_shape")]
 script = ExtResource("9_v0dwf")
@@ -97,6 +188,11 @@ collision_shape = NodePath("../CollisionShape2D")
 [node name="PlayerInput" type="Node" parent="."]
 script = ExtResource("9_u6k5j")
 
+[node name="PlayerPaletteSwap" type="Node" parent="." node_paths=PackedStringArray("visuals", "self_modulate_0")]
+script = ExtResource("18_lmg5v")
+visuals = [NodePath("../Visuals")]
+self_modulate_0 = [NodePath("../FireRotation/Muzzle/ShootFX/ShootGPUParticles2D"), NodePath("../Destroy/DeathFX/DeathGPUParticles2D")]
+
 [node name="PlayerAnimationPlayer" type="AnimationPlayer" parent="." node_paths=PackedStringArray("player_move")]
 libraries = {
 "": ExtResource("14_l8bn7")
@@ -104,4 +200,27 @@ libraries = {
 script = ExtResource("15_0wowu")
 player_move = NodePath("../PlayerMove")
 
+[node name="Destroy" type="Node2D" parent="."]
+script = ExtResource("21_l70jj")
+use_lifetime = false
+
+[node name="DeathFX" type="Node2D" parent="Destroy"]
+script = ExtResource("7_c6snw")
+unparent_on_play = true
+use_lifetime = true
+lifetime = 2.0
+
+[node name="DeathGPUParticles2D" type="GPUParticles2D" parent="Destroy/DeathFX"]
+self_modulate = Color(0.262745, 0.658824, 0.894118, 1)
+z_index = 10
+emitting = false
+amount = 6
+process_material = SubResource("ParticleProcessMaterial_3aj3w")
+texture = ExtResource("8_syjy0")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.8
+
+[connection signal="on_spawn" from="ProjectileManager" to="FireRotation/Muzzle/ShootFX" method="play"]
 [connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]
+[connection signal="died" from="Health" to="Destroy" method="destroy" unbinds=1]

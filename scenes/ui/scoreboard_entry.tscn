@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://cn7aloedpuwjr"]
+
+[ext_resource type="Script" path="res://scripts/ui/scoreboard_entry.gd" id="1_jnycv"]
+
+[node name="ScoreboardEntry" type="HSplitContainer" node_paths=PackedStringArray("player_color_rect", "score_label")]
+script = ExtResource("1_jnycv")
+player_color_rect = NodePath("TextureRect")
+score_label = NodePath("Label")
+
+[node name="TextureRect" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "10"
