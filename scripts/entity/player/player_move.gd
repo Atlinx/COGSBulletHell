@@ -30,7 +30,7 @@ signal is_moving_changed(moving: bool)
 @export var stop_moving_duration_factor: float = 0.1
 @export var stop_moving_duration_min: float = 0.25
 
-@onready var player: Player = get_parent()
+@onready var player:  = get_parent()
 
 var server_position: Vector2
 var is_moving: bool :
@@ -191,8 +191,6 @@ func _sync_to_server(source_position: Vector2):
 		else:
 			angle = deg_to_rad(-90) - angle
 		motion = collision.get_remainder().rotated(angle)
-		#print("motion angle: ", rad_to_deg(motion.angle()), " remainder angle: ", rad_to_deg(collision.get_remainder().angle()))
-		#motion = collision.get_remainder()
 		collision = player.move_and_collide(motion)
 		slide_count += 1
 	server_position = player.global_position

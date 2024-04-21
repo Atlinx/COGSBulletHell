@@ -1,0 +1,230 @@
+[gd_scene load_steps=33 format=3 uid="uid://b746fpsckjvde"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/projectile.gd" id="1_0i34w"]
+[ext_resource type="Texture2D" uid="uid://bis4e0pmbpka3" path="res://assets/art/fx/spell_bomb_glow_fx.png" id="2_e48m4"]
+[ext_resource type="Shader" path="res://assets/shaders/recolor.gdshader" id="3_0uvlf"]
+[ext_resource type="Texture2D" uid="uid://cen6gtkndk4jt" path="res://assets/art/bullets/spell_bomb.png" id="4_7ap7t"]
+[ext_resource type="Script" path="res://scripts/entity/unique_material.gd" id="5_07ui3"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_bpahq"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_applier/hit_once.gd" id="6_j161l"]
+[ext_resource type="Script" path="res://scripts/projectiles/forward_projectile_move.gd" id="7_swrpo"]
+[ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="8_lvhby"]
+[ext_resource type="Script" path="res://scripts/fx.gd" id="9_2nmfu"]
+[ext_resource type="Texture2D" uid="uid://bxutbw0c56cic" path="res://assets/art/fx/96_star_fx.png" id="12_t23j3"]
+[ext_resource type="Script" path="res://scripts/entity/team.gd" id="12_wt5b4"]
+[ext_resource type="Script" path="res://scripts/projectiles/spawn_projectiles.gd" id="13_472lb"]
+[ext_resource type="Script" path="res://scripts/projectiles/palette_swap_projectile.gd" id="13_i7wjr"]
+[ext_resource type="Texture2D" uid="uid://dc236m2hrwthv" path="res://assets/art/fx/64_star_fx.png" id="13_rmgon"]
+[ext_resource type="Script" path="res://scripts/entity/palette_swap.gd" id="14_ipbfj"]
+[ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="14_mdc6w"]
+[ext_resource type="Script" path="res://scripts/projectiles/prefix_projectile_manager.gd" id="15_bl6v6"]
+[ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/projectiles/basic_bullet.tscn" id="15_g88rs"]
+[ext_resource type="Script" path="res://scripts/projectiles/projectile_recolor_projectile_manager.gd" id="15_on2i2"]
+[ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="16_ywxfi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q827d"]
+shader = ExtResource("3_0uvlf")
+shader_parameter/original_0 = Color(1, 0, 0, 1)
+shader_parameter/original_1 = Color(0, 0, 0, 0)
+shader_parameter/original_2 = Color(0, 0, 0, 0)
+shader_parameter/original_3 = Color(0, 0, 0, 0)
+shader_parameter/replace_0 = Color(0.984314, 0.188235, 0.188235, 1)
+shader_parameter/replace_1 = Color(0.772549, 0.215686, 0.215686, 1)
+shader_parameter/replace_2 = Color(0.407843, 0.192157, 0.192157, 1)
+shader_parameter/replace_3 = Color(0, 0, 0, 1)
+shader_parameter/precision = 0.05
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pxdax"]
+radius = 38.0132
+
+[sub_resource type="Curve" id="Curve_nh7a7"]
+max_value = 2.0
+_data = [Vector2(0, 1.49451), 0.0, -4.25782, 0, 0, Vector2(0.223744, 0.989011), 0.0, 0.0, 0, 0, Vector2(0.872146, 0.835165), 0.0, 0.0, 0, 0, Vector2(1, 0), -4.41209, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_y4et6"]
+curve = SubResource("Curve_nh7a7")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_vyri1"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 0, 0)
+damping_min = 100.0
+damping_max = 100.0
+scale_min = 2.0
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_y4et6")
+
+[sub_resource type="Curve" id="Curve_lwies"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.3379, 1), 0.0, 0.0, 0, 0, Vector2(0.981735, 0), -2.84416, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_62aig"]
+curve = SubResource("Curve_lwies")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_a4vyk"]
+lifetime_randomness = 0.4
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+spread = 180.0
+initial_velocity_min = 200.0
+initial_velocity_max = 250.0
+gravity = Vector3(0, 0, 0)
+damping_min = 100.0
+damping_max = 100.0
+scale_max = 1.5
+scale_curve = SubResource("CurveTexture_62aig")
+
+[sub_resource type="Animation" id="Animation_1jx3a"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Glow:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_16bqd"]
+resource_name = "glow"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Glow:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1.09724, 1.09724), Vector2(0.886442, 0.886442)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_nj4ax"]
+_data = {
+"RESET": SubResource("Animation_1jx3a"),
+"glow": SubResource("Animation_16bqd")
+}
+
+[node name="SpellBomb" type="Node2D"]
+script = ExtResource("1_0i34w")
+
+[node name="Glow" type="Sprite2D" parent="."]
+self_modulate = Color(0.984314, 0.188235, 0.188235, 0.25098)
+texture = ExtResource("2_e48m4")
+
+[node name="Visual" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_q827d")
+texture = ExtResource("4_7ap7t")
+
+[node name="UniqueMaterial" type="Node" parent="Visual"]
+script = ExtResource("5_07ui3")
+
+[node name="HitBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("5_bpahq")
+entity = NodePath("..")
+detect_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
+shape = SubResource("CircleShape2D_pxdax")
+
+[node name="HitOnce" type="Node" parent="HitBox"]
+script = ExtResource("6_j161l")
+damage = 20
+
+[node name="ForwardProjectileMove" type="Node" parent="."]
+script = ExtResource("7_swrpo")
+speed = 600.0
+
+[node name="Destroy" type="Node2D" parent="."]
+script = ExtResource("8_lvhby")
+lifetime = 3.0
+
+[node name="SpellFX" type="Node2D" parent="Destroy"]
+script = ExtResource("9_2nmfu")
+unparent_on_play = true
+free_after_lifetime = true
+lifetime = 1.0
+is_chain = true
+synced = true
+
+[node name="SpellParticles" type="GPUParticles2D" parent="Destroy/SpellFX"]
+self_modulate = Color(0.984314, 0.188235, 0.188235, 1)
+emitting = false
+amount = 1
+process_material = SubResource("ParticleProcessMaterial_vyri1")
+texture = ExtResource("12_t23j3")
+one_shot = true
+explosiveness = 0.9
+
+[node name="SpellPostFX" type="Node2D" parent="Destroy/SpellFX"]
+script = ExtResource("9_2nmfu")
+lifetime = 1.0
+
+[node name="SpellPostParticles" type="GPUParticles2D" parent="Destroy/SpellFX/SpellPostFX"]
+self_modulate = Color(0.984314, 0.188235, 0.188235, 1)
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_a4vyk")
+texture = ExtResource("13_rmgon")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.9
+
+[node name="SpawnProjectiles" type="Node" parent="Destroy" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+script = ExtResource("13_472lb")
+projectile_manager = NodePath("ProjectileManager")
+muzzle = NodePath("..")
+muzzle_offset = 64.0
+amount = 5
+is_radial = true
+
+[node name="ProjectileManager" type="Node" parent="Destroy/SpawnProjectiles" node_paths=PackedStringArray("team")]
+script = ExtResource("14_mdc6w")
+team = NodePath("../../../Team")
+prefabs = Array[PackedScene]([ExtResource("15_g88rs")])
+
+[node name="PrefixProjectileManager" type="Node" parent="Destroy/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("base_node")]
+script = ExtResource("15_bl6v6")
+base_node = NodePath("../../../..")
+prefix = "Spell"
+
+[node name="RecolorProjectileManager" type="Node" parent="Destroy/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("projectile")]
+script = ExtResource("15_on2i2")
+projectile = NodePath("../../../..")
+
+[node name="Team" type="Node" parent="."]
+script = ExtResource("12_wt5b4")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_nj4ax")
+}
+autoplay = "glow"
+
+[node name="PaletteSwapProjectile" type="Node" parent="."]
+script = ExtResource("13_i7wjr")
+palette = ExtResource("16_ywxfi")
+
+[node name="MainPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("visuals", "self_modulate_0")]
+script = ExtResource("14_ipbfj")
+visuals = [NodePath("../../Visual")]
+self_modulate_0 = [NodePath("../../Destroy/SpellFX/SpellParticles"), NodePath("../../Destroy/SpellFX/SpellPostFX/SpellPostParticles")]
+palette = ExtResource("16_ywxfi")
+
+[node name="GlowPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("self_modulate_0")]
+script = ExtResource("14_ipbfj")
+self_modulate_0 = [NodePath("../../Glow")]
+modulate = Color(1, 1, 1, 0.25098)
+palette = ExtResource("16_ywxfi")
+
+[connection signal="detector_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
+[connection signal="wall_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]

@@ -29,7 +29,6 @@ func load_level():
 				collision_shape.disabled = not multiplayer.is_server()
 	spawnpoints = []
 	spawnpoints.assign(get_tree().get_nodes_in_group("Spawnpoint"))
-	print("loaded level with spawnpoints: ", spawnpoints)
 
 
 func _on_game_reseted():

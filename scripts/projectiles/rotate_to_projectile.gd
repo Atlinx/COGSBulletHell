@@ -8,9 +8,5 @@ extends Node
 
 
 func _ready():
-	projectile.constructed.connect(_on_constructed)
-
-
-func _on_constructed(data: Dictionary):
-	var angle = data.get("direction", Vector2.ZERO).angle()
+	var angle = projectile.data.get("direction", Vector2.ZERO).angle()
 	parent.global_rotation = deg_to_rad(offset) + angle

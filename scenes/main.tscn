@@ -11,21 +11,9 @@
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
 [ext_resource type="PackedScene" uid="uid://dwovq5jl3h058" path="res://scenes/player.tscn" id="6_qj4uo"]
 [ext_resource type="PackedScene" uid="uid://cn7aloedpuwjr" path="res://scenes/ui/scoreboard_entry.tscn" id="8_y3w7w"]
-[ext_resource type="Script" path="res://scripts/color_palette.gd" id="11_psfxx"]
-
-[sub_resource type="Resource" id="Resource_j8oq4"]
-script = ExtResource("11_psfxx")
-color_1 = Color(0.984314, 0.188235, 0.188235, 1)
-color_2 = Color(0.772549, 0.215686, 0.215686, 1)
-color_3 = Color(0.407843, 0.192157, 0.192157, 1)
-color_4 = Color(0, 0, 0, 1)
-
-[sub_resource type="Resource" id="Resource_1k23g"]
-script = ExtResource("11_psfxx")
-color_1 = Color(0.290196, 0.835294, 1, 1)
-color_2 = Color(0.294118, 0.643137, 0.796078, 1)
-color_3 = Color(0.2, 0.345098, 0.501961, 1)
-color_4 = Color(0, 0, 0, 1)
+[ext_resource type="PackedScene" uid="uid://c5ah4utikwf8k" path="res://scenes/manual_player.tscn" id="12_206qu"]
+[ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="13_3ofs7"]
+[ext_resource type="Resource" uid="uid://dembgtbg6r00f" path="res://assets/palettes/p2_palette.tres" id="14_fdi5q"]
 
 [node name="Main" type="Node"]
 
@@ -293,4 +281,5 @@ world = NodePath("../World")
 network_manager = NodePath("../NetworkManager")
 level_manager = NodePath("../LevelManager")
 player_prefab = ExtResource("6_qj4uo")
-color_palettes = Array[ExtResource("11_psfxx")]([SubResource("Resource_j8oq4"), SubResource("Resource_1k23g")])
+manual_player_prefab = ExtResource("12_206qu")
+color_palettes = Array[Resource("res://scripts/color_palette.gd")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q")])

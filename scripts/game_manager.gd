@@ -36,6 +36,7 @@ static var instance: GameManager
 @export var network_manager: NetworkManager
 @export var level_manager: LevelManager
 @export var player_prefab: PackedScene
+@export var manual_player_prefab: PackedScene
 @export var color_palettes: Array[ColorPalette]
 
 ## [player_id: int]: GamePlayer
@@ -120,9 +121,11 @@ func _spawn_players():
 
 @rpc("authority", "call_local", "reliable")
 func _spawn_player(player_id: int, location: int):
-	var player_inst = player_prefab.instantiate() as Player
 	var game_player = get_player(player_id)
-	player_inst.construct(game_player, "Player" + str(game_player.network_player.multiplayer_id))
+	var player_inst = player_prefab.instantiate() as Player
+	var manual_player = manual_player_prefab.instantiate() as ManualPlayer
+	player_inst.add_child(manual_player)
+	manual_player.pre_construct(game_player, "Player" + str(game_player.network_player_index))
 	player_inst.global_position = level_manager.spawnpoints[location].global_position
 	if network_manager.is_server:
 		player_inst.died.connect(_on_player_died.bind(player_inst))
@@ -140,12 +143,13 @@ func _spawn_player(player_id: int, location: int):
 
 
 func _on_player_died(killing_damage_info: DamageInfo, player: Player):
-	print("player died: received on game manager, attacker: ", killing_damage_info.attacker, " player: ", player)
 	if killing_damage_info.attacker is Player:
 		var attacking_player = killing_damage_info.attacker as Player
-		_add_score.rpc(attacking_player.game_player.network_player.multiplayer_id)
+		var manual_player = attacking_player.get_node_or_null("ManualPlayer") as ManualPlayer
+		if manual_player:
+			_add_score.rpc(manual_player.game_player.network_player.multiplayer_id)
 	var game_count = _game_count
-	var game_player = player.game_player
+	var game_player = player.get_node("ManualPlayer").game_player as GamePlayer
 	if my_player == player:
 		my_player = null
 	await get_tree().create_timer(spawn_interval).timeout

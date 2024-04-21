@@ -1,0 +1,172 @@
+[gd_scene load_steps=25 format=3 uid="uid://dpnx1vflldwg8"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/projectile.gd" id="1_rpk0v"]
+[ext_resource type="Texture2D" uid="uid://ps7et8igew4t" path="res://assets/art/fx/96_circle_fx.png" id="2_gq7hs"]
+[ext_resource type="Shader" path="res://assets/shaders/recolor.gdshader" id="3_7lbcc"]
+[ext_resource type="Texture2D" uid="uid://dmqt0hfqq031m" path="res://assets/art/bullets/bullet_circle.png" id="4_5idth"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_7nsf3"]
+[ext_resource type="Script" path="res://scripts/entity/unique_material.gd" id="5_xlwhe"]
+[ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_applier/hit_once.gd" id="6_p070d"]
+[ext_resource type="Script" path="res://scripts/projectiles/forward_projectile_move.gd" id="7_icuxf"]
+[ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="8_du171"]
+[ext_resource type="Script" path="res://scripts/fx.gd" id="9_x8qrw"]
+[ext_resource type="Texture2D" uid="uid://b05q2b0cgv3rx" path="res://assets/art/fx/64_circle_fx.png" id="10_t4gut"]
+[ext_resource type="Script" path="res://scripts/projectiles/rotate_to_projectile.gd" id="11_tx618"]
+[ext_resource type="Script" path="res://scripts/entity/team.gd" id="12_qplov"]
+[ext_resource type="Script" path="res://scripts/entity/palette_swap.gd" id="14_34dtq"]
+[ext_resource type="Script" path="res://scripts/projectiles/palette_swap_projectile.gd" id="14_sxaxn"]
+[ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="15_s5d8d"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k3ubm"]
+shader = ExtResource("3_7lbcc")
+shader_parameter/original_0 = Color(1, 0, 0, 1)
+shader_parameter/original_1 = Color(0, 0, 0, 0)
+shader_parameter/original_2 = Color(0, 0, 0, 0)
+shader_parameter/original_3 = Color(0, 0, 0, 0)
+shader_parameter/replace_0 = Color(0.984314, 0.188235, 0.188235, 1)
+shader_parameter/replace_1 = Color(0.772549, 0.215686, 0.215686, 1)
+shader_parameter/replace_2 = Color(0.407843, 0.192157, 0.192157, 1)
+shader_parameter/replace_3 = Color(0, 0, 0, 1)
+shader_parameter/precision = 0.05
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kj6p6"]
+radius = 32.0
+
+[sub_resource type="Curve" id="Curve_ihec5"]
+_data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_6wcmg"]
+curve = SubResource("Curve_ihec5")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qihf0"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+initial_velocity_min = 250.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 70.0
+damping_max = 70.0
+scale_curve = SubResource("CurveTexture_6wcmg")
+
+[sub_resource type="Animation" id="Animation_1jx3a"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Glow:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_16bqd"]
+resource_name = "glow"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Glow:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1.09724, 1.09724), Vector2(0.886442, 0.886442)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_nj4ax"]
+_data = {
+"RESET": SubResource("Animation_1jx3a"),
+"glow": SubResource("Animation_16bqd")
+}
+
+[node name="BasicBullet" type="Node2D"]
+script = ExtResource("1_rpk0v")
+
+[node name="Glow" type="Sprite2D" parent="."]
+self_modulate = Color(0.984314, 0.188235, 0.188235, 0.25098)
+texture = ExtResource("2_gq7hs")
+
+[node name="Visual" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_k3ubm")
+texture = ExtResource("4_5idth")
+
+[node name="UniqueMaterial" type="Node" parent="Visual"]
+script = ExtResource("5_xlwhe")
+
+[node name="HitBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("5_7nsf3")
+entity = NodePath("..")
+detect_mode = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
+shape = SubResource("CircleShape2D_kj6p6")
+
+[node name="HitOnce" type="Node" parent="HitBox"]
+script = ExtResource("6_p070d")
+damage = 10
+
+[node name="ForwardProjectileMove" type="Node" parent="."]
+script = ExtResource("7_icuxf")
+speed = 800.0
+
+[node name="Destroy" type="Node2D" parent="."]
+script = ExtResource("8_du171")
+
+[node name="DeathFX" type="Node2D" parent="Destroy"]
+script = ExtResource("9_x8qrw")
+unparent_on_play = true
+free_after_lifetime = true
+lifetime = 2.0
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Destroy/DeathFX"]
+self_modulate = Color(1, 0, 0, 1)
+rotation = 3.14159
+emitting = false
+amount = 3
+process_material = SubResource("ParticleProcessMaterial_qihf0")
+texture = ExtResource("10_t4gut")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.8
+
+[node name="RotateToProjectile" type="Node" parent="Destroy/DeathFX" node_paths=PackedStringArray("projectile")]
+script = ExtResource("11_tx618")
+projectile = NodePath("../../..")
+
+[node name="Team" type="Node" parent="."]
+script = ExtResource("12_qplov")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_nj4ax")
+}
+autoplay = "glow"
+
+[node name="PaletteSwapProjectile" type="Node" parent="."]
+script = ExtResource("14_sxaxn")
+palette = ExtResource("15_s5d8d")
+
+[node name="MainPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("visuals")]
+script = ExtResource("14_34dtq")
+visuals = [NodePath("../../Visual")]
+palette = ExtResource("15_s5d8d")
+
+[node name="GlowPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("self_modulate_0")]
+script = ExtResource("14_34dtq")
+self_modulate_0 = [NodePath("../../Glow")]
+modulate = Color(1, 1, 1, 0.25098)
+palette = ExtResource("15_s5d8d")
+
+[connection signal="detector_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
+[connection signal="wall_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]

@@ -45,6 +45,7 @@ func _create_copy():
 
 func _play_copy(copy: AdvancedGPUParticles2D):
 	_free_copies.erase(copy)
+	copy.preprocess = preprocess
 	copy.restart()
 
 

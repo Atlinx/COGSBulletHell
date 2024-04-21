@@ -6,32 +6,41 @@ signal on_spawn
 
 
 @export var prefix: String
-@export var use_parent_team: bool = true
+@export var team: Team
 @export var prefabs: Array[PackedScene]
+# Max projectiles that can be on screen
+# After counter reaches projectiles_limit,
+# it rolls over back to 0
+@export var projectiles_limit = 1000
 
 var network_manager: NetworkManager
 var world: World
 var counter: int
+## Local data that is copied to spawned projectiles
+var local_data: Dictionary = {}
+
 
 func _ready():
 	world = World.instance
 	network_manager = NetworkManager.instance
 
-
+func spawn_projectile(prefab: PackedScene, data: Dictionary):
+	var index = prefabs.find(prefab)
+	assert(index >= 0, "Expected prefab to exist in prefabs list")
+	spawn_projectile_id(index, data)
+	
 # data: {
 #   name: String 
 #   position: Vector2
 #   direction: Vector2
 # }
-func spawn_projectile(prefab: PackedScene, data: Dictionary):
-	var index = prefabs.find(prefab)
-	assert(index >= 0, "Expected prefab to exist in prefabs list")
-	if use_parent_team:
-		var parent_team = get_parent().get_node_or_null("Team") as Team
-		if parent_team and not "team" in data:
-			data.team = parent_team.team
+func spawn_projectile_id(index: int, data: Dictionary):
+	assert(index >= 0 and index < prefabs.size(), "Projectile index must be within prefabs array bounds")
+	if team:
+		if not "team" in data:
+			data.team = team.team
 		if not "entity_owner" in data:
-			data.entity_owner = get_parent().get_path()
+			data.entity_owner = team.entity_owner.get_path()
 	data.time = network_manager.server_time
 	data._prefab_index = index
 	# Spawn immediately on our side
@@ -52,11 +61,15 @@ func _spawn_projectile_server(data: Dictionary):
 
 
 @rpc("authority", "call_local", "reliable")
-func _spawn_projectile_clients(data: Dictionary):
-	var prefab = prefabs[data._prefab_index]
+func _spawn_projectile_clients(network_data: Dictionary):
+	var prefab = prefabs[network_data._prefab_index]
 	var inst = prefab.instantiate() as Projectile
+	var data = local_data.duplicate()
+	data.merge(network_data, true)
 	inst.name = prefix + str(counter)
+	inst.pre_construct(data)
 	world.add_child(inst)
-	inst.construct(data)
 	counter += 1
+	if counter >= projectiles_limit:
+		counter = 0
 	on_spawn.emit()

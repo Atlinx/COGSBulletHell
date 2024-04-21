@@ -27,6 +27,8 @@ func _destroy(death_position: Vector2):
 		for child in get_children():
 			if child is FX:
 				child.play()
+			elif child is SpawnProjectiles:
+				child.spawn()
 		_is_destroyed = true
 		destroyed.emit()
 		get_parent().queue_free.call_deferred()

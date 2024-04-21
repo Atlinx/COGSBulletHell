@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://c5ah4utikwf8k"]
+
+[ext_resource type="Script" path="res://scripts/entity/player/manual_player.gd" id="1_dslq1"]
+[ext_resource type="Script" path="res://scripts/entity/player/inputs/keyboard_controller_player_input.gd" id="2_dvp04"]
+
+[node name="ManualPlayer" type="Node2D" node_paths=PackedStringArray("camera")]
+script = ExtResource("1_dslq1")
+camera = NodePath("Camera2D")
+
+[node name="KeyboardControllerPlayerInput" type="Node" parent="."]
+script = ExtResource("2_dvp04")
+
+[node name="Camera2D" type="Camera2D" parent="."]

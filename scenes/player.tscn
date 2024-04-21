@@ -1,7 +1,7 @@
-[gd_scene load_steps=31 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=35 format=3 uid="uid://dwovq5jl3h058"]
 
+[ext_resource type="Script" path="res://scripts/entity/player/player.gd" id="1_mmakg"]
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
-[ext_resource type="Script" path="res://scripts/entity/player.gd" id="1_vxqq4"]
 [ext_resource type="Script" path="res://scripts/projectiles/projectile_manager.gd" id="3_0uggd"]
 [ext_resource type="Shader" path="res://assets/shaders/recolor_overlay.gdshader" id="3_1mnd0"]
 [ext_resource type="Script" path="res://scripts/entity/overlay_fx.gd" id="3_734co"]
@@ -10,16 +10,20 @@
 [ext_resource type="Script" path="res://scripts/entity/hit_detector/hit_detector.gd" id="5_3w5l7"]
 [ext_resource type="Script" path="res://scripts/entity/team.gd" id="5_qv7pe"]
 [ext_resource type="Script" path="res://scripts/fx.gd" id="7_c6snw"]
-[ext_resource type="Script" path="res://scripts/entity/player_shoot.gd" id="8_3mvmw"]
 [ext_resource type="Texture2D" uid="uid://b05q2b0cgv3rx" path="res://assets/art/fx/64_circle_fx.png" id="8_syjy0"]
-[ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/basic_bullet.tscn" id="9_8rhiw"]
 [ext_resource type="Script" path="res://scripts/entity/advanced_gpu_particles_2d.gd" id="9_kxbcm"]
 [ext_resource type="Texture2D" uid="uid://dmr5w4svu0bxn" path="res://assets/art/fx/16_circle_fx.png" id="9_mqncq"]
-[ext_resource type="Script" path="res://scripts/entity/player_input.gd" id="9_u6k5j"]
-[ext_resource type="Script" path="res://scripts/entity/player_move.gd" id="9_v0dwf"]
+[ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/projectiles/basic_bullet.tscn" id="14_58vdw"]
 [ext_resource type="AnimationLibrary" uid="uid://k8m0bt6tielb" path="res://assets/animations/player_anim.tres" id="14_l8bn7"]
-[ext_resource type="Script" path="res://scripts/entity/player_animation_player.gd" id="15_0wowu"]
+[ext_resource type="Script" path="res://scripts/projectiles/player_recolor_projectile_manager.gd" id="15_tqphn"]
+[ext_resource type="PackedScene" uid="uid://b746fpsckjvde" path="res://scenes/projectiles/spell_bomb.tscn" id="15_v3m2w"]
+[ext_resource type="Script" path="res://scripts/entity/player/player_aim.gd" id="16_hyj00"]
+[ext_resource type="Script" path="res://scripts/entity/player/player_move.gd" id="16_n30vn"]
+[ext_resource type="Script" path="res://scripts/projectiles/spawn_projectiles.gd" id="16_rkx3d"]
+[ext_resource type="Script" path="res://scripts/entity/player/inputs/player_input.gd" id="17_tqdpq"]
+[ext_resource type="Script" path="res://scripts/projectiles/prefix_projectile_manager.gd" id="17_wq0de"]
 [ext_resource type="Script" path="res://scripts/entity/palette_swap.gd" id="18_lmg5v"]
+[ext_resource type="Script" path="res://scripts/entity/player/player_animation_player.gd" id="20_qpu25"]
 [ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="21_l70jj"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1u1l7"]
@@ -86,11 +90,10 @@ damping_min = 70.0
 damping_max = 70.0
 scale_curve = SubResource("CurveTexture_m5qes")
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("camera", "palette_swap", "team", "health")]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("palette_swap", "team", "health")]
 collision_layer = 2
 motion_mode = 1
-script = ExtResource("1_vxqq4")
-camera = NodePath("Camera2D")
+script = ExtResource("1_mmakg")
 palette_swap = NodePath("PlayerPaletteSwap")
 team = NodePath("Team")
 health = NodePath("Health")
@@ -114,8 +117,6 @@ duration = 0.25
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
 shape = SubResource("CircleShape2D_vt3h3")
-
-[node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="FireRotation" type="Node2D" parent="."]
 
@@ -153,40 +154,63 @@ detect_mode = 1
 shape = SubResource("CircleShape2D_oln88")
 debug_color = Color(0.701961, 0, 0, 0.419608)
 
-[node name="ProjectileManager" type="Node" parent="."]
-script = ExtResource("3_0uggd")
-prefix = "Player"
-prefabs = Array[PackedScene]([ExtResource("9_8rhiw")])
-
-[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="ProjectileManager"]
-
 [node name="Health" type="Node" parent="."]
 script = ExtResource("4_x6q3w")
-health = 100
-max_health = 100
+health = 50
+max_health = 50
 
 [node name="Team" type="Node" parent="." node_paths=PackedStringArray("entity_owner")]
 script = ExtResource("5_qv7pe")
 entity_owner = NodePath("..")
 team = "Player"
 
-[node name="PlayerShoot" type="Node" parent="." node_paths=PackedStringArray("projectile_manager", "visuals", "input", "fire_rotation", "muzzle")]
-script = ExtResource("8_3mvmw")
-projectile_prefab = ExtResource("9_8rhiw")
-projectile_manager = NodePath("../ProjectileManager")
+[node name="ProjectileManager" type="Node" parent="." node_paths=PackedStringArray("team")]
+script = ExtResource("3_0uggd")
+prefix = "Player"
+team = NodePath("../Team")
+prefabs = Array[PackedScene]([ExtResource("14_58vdw"), ExtResource("15_v3m2w")])
+
+[node name="RecolorProjectileManager" type="Node" parent="ProjectileManager" node_paths=PackedStringArray("player")]
+script = ExtResource("15_tqphn")
+player = NodePath("../..")
+
+[node name="PrefixProjectileManager" type="Node" parent="ProjectileManager" node_paths=PackedStringArray("base_node")]
+script = ExtResource("17_wq0de")
+base_node = NodePath("../..")
+prefix = "Proj"
+
+[node name="PlayerShooting" type="Node" parent="."]
+
+[node name="Primary" type="Node" parent="PlayerShooting" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+script = ExtResource("16_rkx3d")
+projectile_manager = NodePath("../../ProjectileManager")
+muzzle = NodePath("../../FireRotation/Muzzle")
+muzzle_offset = null
+amount = 1
+
+[node name="Secondary" type="Node" parent="PlayerShooting" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+script = ExtResource("16_rkx3d")
+projectile_manager = NodePath("../../ProjectileManager")
+muzzle = NodePath("../../FireRotation/Muzzle")
+muzzle_offset = null
+prefab_index = 1
+amount = 1
+
+[node name="PlayerAim" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "fire_rotation", "muzzle")]
+script = ExtResource("16_hyj00")
 visuals = NodePath("../Visuals")
 input = NodePath("../PlayerInput")
 fire_rotation = NodePath("../FireRotation")
 muzzle = NodePath("../FireRotation/Muzzle")
 
 [node name="PlayerMove" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "collision_shape")]
-script = ExtResource("9_v0dwf")
+script = ExtResource("16_n30vn")
 visuals = NodePath("../Visuals")
 input = NodePath("../PlayerInput")
 collision_shape = NodePath("../CollisionShape2D")
 
 [node name="PlayerInput" type="Node" parent="."]
-script = ExtResource("9_u6k5j")
+script = ExtResource("17_tqdpq")
 
 [node name="PlayerPaletteSwap" type="Node" parent="." node_paths=PackedStringArray("visuals", "self_modulate_0")]
 script = ExtResource("18_lmg5v")
@@ -197,7 +221,7 @@ self_modulate_0 = [NodePath("../FireRotation/Muzzle/ShootFX/ShootGPUParticles2D"
 libraries = {
 "": ExtResource("14_l8bn7")
 }
-script = ExtResource("15_0wowu")
+script = ExtResource("20_qpu25")
 player_move = NodePath("../PlayerMove")
 
 [node name="Destroy" type="Node2D" parent="."]
@@ -207,7 +231,7 @@ use_lifetime = false
 [node name="DeathFX" type="Node2D" parent="Destroy"]
 script = ExtResource("7_c6snw")
 unparent_on_play = true
-use_lifetime = true
+free_after_lifetime = true
 lifetime = 2.0
 
 [node name="DeathGPUParticles2D" type="GPUParticles2D" parent="Destroy/DeathFX"]
@@ -221,6 +245,8 @@ lifetime = 0.5
 one_shot = true
 explosiveness = 0.8
 
-[connection signal="on_spawn" from="ProjectileManager" to="FireRotation/Muzzle/ShootFX" method="play"]
 [connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]
 [connection signal="died" from="Health" to="Destroy" method="destroy" unbinds=1]
+[connection signal="on_spawn" from="ProjectileManager" to="FireRotation/Muzzle/ShootFX" method="play"]
+[connection signal="on_primary_used" from="PlayerInput" to="PlayerShooting/Primary" method="spawn"]
+[connection signal="on_secondary_used" from="PlayerInput" to="PlayerShooting/Secondary" method="spawn"]

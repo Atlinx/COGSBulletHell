@@ -2,14 +2,14 @@ class_name Projectile
 extends Node2D
 
 
-signal constructed(data: Dictionary)
-
 var data: Dictionary
 
 
-func construct(_data: Dictionary):
+func pre_construct(_data: Dictionary):
 	data = _data
+
+
+func _enter_tree():
 	var team = get_node("Team") as Team
 	team.team = data.team
 	team.entity_owner = get_node_or_null(data.entity_owner)
-	constructed.emit(data)
