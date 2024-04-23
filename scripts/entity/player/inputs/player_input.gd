@@ -9,11 +9,18 @@ enum AbilityType {
 	SPECIAL
 }
 
-signal on_primary_used
-signal on_secondary_used
-signal on_utility_used
-signal on_special_used
-signal on_ability_used(type: AbilityType)
+enum AbilityTypeFlag {
+	PRIMARY = 1 << 0,
+	SECONDARY = 1 << 1,
+	UTILITY = 1 << 2,
+	SPECIAL = 1 << 3,
+}
+
+signal on_primary_used(pressed: bool)
+signal on_secondary_used(pressed: bool)
+signal on_utility_used(pressed: bool)
+signal on_special_used(pressed: bool)
+signal on_ability_used(type: AbilityType, pressed: bool)
 
 
 @export var aim_direction: Vector2 = Vector2.RIGHT :
@@ -33,36 +40,32 @@ signal on_ability_used(type: AbilityType)
 	set(value):
 		if value != is_using_primary:
 			is_using_primary = value
-			if is_using_primary:
-				on_primary_used.emit()
-				on_ability_used.emit(AbilityType.PRIMARY)
+			on_primary_used.emit(is_using_primary)
+			on_ability_used.emit(AbilityType.PRIMARY, is_using_primary)
 @export var is_using_secondary: bool :
 	get:
 		return is_using_secondary
 	set(value):
 		if value != is_using_secondary:
 			is_using_secondary = value
-			if is_using_secondary:
-				on_secondary_used.emit()
-				on_ability_used.emit(AbilityType.SECONDARY)
+			on_secondary_used.emit(is_using_secondary)
+			on_ability_used.emit(AbilityType.SECONDARY, is_using_secondary)
 @export var is_using_utility: bool :
 	get:
 		return is_using_utility
 	set(value):
 		if value != is_using_utility:
 			is_using_utility = value
-			if is_using_utility:
-				on_utility_used.emit()
-				on_ability_used.emit(AbilityType.UTILITY)
+			on_utility_used.emit(is_using_utility)
+			on_ability_used.emit(AbilityType.UTILITY, is_using_utility)
 @export var is_using_special: bool :
 	get:
 		return is_using_special
 	set(value):
 		if value != is_using_special:
 			is_using_special = value
-			if is_using_special:
-				on_special_used.emit()
-				on_ability_used.emit(AbilityType.SPECIAL)
+			on_special_used.emit(is_using_special)
+			on_ability_used.emit(AbilityType.SPECIAL, is_using_special)
 
 var network_manager: NetworkManager
 var game_manager: GameManager
@@ -92,6 +95,15 @@ func is_ability_used(ability: AbilityType):
 
 
 func _on_game_ticked():
+	var is_using_ability = 0
+	if is_using_primary:
+		is_using_ability |= AbilityTypeFlag.PRIMARY
+	if is_using_secondary:
+		is_using_ability |= AbilityTypeFlag.SECONDARY
+	if is_using_utility:
+		is_using_ability |= AbilityTypeFlag.UTILITY
+	if is_using_special:
+		is_using_ability |= AbilityTypeFlag.SPECIAL
 	if not network_manager.is_server:
 		_sync_to_server.rpc_id(1, move_direction, aim_direction)
 	elif network_manager.is_player_server:
@@ -99,7 +111,11 @@ func _on_game_ticked():
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _sync_to_server(_move_direction: Vector2, _aim_direction: Vector2):
+func _sync_to_server(_move_direction: Vector2, _aim_direction: Vector2, is_using_ability: int):
+	is_using_primary = is_using_ability & AbilityTypeFlag.PRIMARY
+	is_using_secondary = is_using_ability & AbilityTypeFlag.SECONDARY
+	is_using_utility = is_using_ability & AbilityTypeFlag.UTILITY
+	is_using_special = is_using_ability & AbilityTypeFlag.SPECIAL
 	move_direction = _move_direction
 	aim_direction = _aim_direction
 	_sync_to_clients.rpc(move_direction, aim_direction)

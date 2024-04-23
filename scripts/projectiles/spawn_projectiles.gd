@@ -1,3 +1,10 @@
+## Spawns projectiles with a customizable pattern
+##
+## Children of this node can edit the spawned projectiles by implementing
+## a `_construct_projectile(data: Dictionary)` method, which gets 
+## automatically called whenever a new projectile is made.
+## The new projectile's data dictionary is passed into the method,
+## allowing modification of the new projectile's data.
 @tool
 class_name SpawnProjectiles
 extends Node
@@ -47,6 +54,9 @@ func spawn(_prefab_index: int = prefab_index):
 				"direction": direction
 			}
 			data.merge(local_data)
+			for child in get_children():
+				if child.has_method("_construct_projectile"):
+					child._construct_projectile(data)
 			projectile_manager.spawn_projectile_id(_prefab_index, data)
 		round_spawned.emit()
 		await get_tree().create_timer(round_interval).timeout

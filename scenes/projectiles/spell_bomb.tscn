@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://b746fpsckjvde"]
+[gd_scene load_steps=36 format=3 uid="uid://b746fpsckjvde"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/projectile.gd" id="1_0i34w"]
 [ext_resource type="Texture2D" uid="uid://bis4e0pmbpka3" path="res://assets/art/fx/spell_bomb_glow_fx.png" id="2_e48m4"]
@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://dpnx1vflldwg8" path="res://scenes/projectiles/basic_bullet.tscn" id="15_g88rs"]
 [ext_resource type="Script" path="res://scripts/projectiles/projectile_recolor_projectile_manager.gd" id="15_on2i2"]
 [ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="16_ywxfi"]
+[ext_resource type="Script" path="res://scripts/projectiles/manual_activate.gd" id="23_ny723"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_q827d"]
 shader = ExtResource("3_0uvlf")
@@ -557,7 +558,7 @@ script = ExtResource("9_2nmfu")
 prefix_name_source = NodePath("../..")
 unparent_on_play = true
 free_after_lifetime = true
-lifetime = 1.0
+lifetime = 0.5
 is_chain = true
 synced = true
 
@@ -567,6 +568,7 @@ emitting = false
 amount = 1
 process_material = SubResource("ParticleProcessMaterial_vyri1")
 texture = ExtResource("12_t23j3")
+lifetime = 0.5
 one_shot = true
 explosiveness = 0.9
 
@@ -622,14 +624,10 @@ projectile = NodePath("../../../../../..")
 
 [node name="ProjManagerTeam" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("source_team")]
 script = ExtResource("12_wt5b4")
-entity_owner_type = null
-_entity_owner_data = null
 source_team = NodePath("../../../../../../Team")
 
 [node name="Team" type="Node" parent="."]
 script = ExtResource("12_wt5b4")
-entity_owner_type = null
-_entity_owner_data = null
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -653,6 +651,10 @@ self_modulate_0 = [NodePath("../../Glow")]
 modulate = Color(1, 1, 1, 0.25098)
 palette = ExtResource("16_ywxfi")
 
+[node name="ManualActivate" type="Node" parent="."]
+script = ExtResource("23_ny723")
+
 [connection signal="detector_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
 [connection signal="wall_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
 [connection signal="round_spawned" from="Destroy/SpellFX/SpellPostFX/SpawnProjectiles" to="Destroy/SpellFX/SpellPostFX/Container/SpellBlastFX" method="play"]
+[connection signal="activated" from="ManualActivate" to="Destroy" method="destroy"]

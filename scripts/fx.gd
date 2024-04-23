@@ -83,7 +83,7 @@ func _process(delta):
 					child.play(default_animation_name)
 					child.seek(_preprocess_tracker, true)
 				elif child is SpawnProjectiles:
-					if is_multiplayer_authority():
+					if not Engine.is_editor_hint() and is_multiplayer_authority():
 						child.spawn()
 			_lifetime_timer = maxf(lifetime - _preprocess_tracker, 0)
 			_preprocess_tracker = maxf(_preprocess_tracker - lifetime, 0)

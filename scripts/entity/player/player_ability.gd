@@ -1,10 +1,14 @@
+## Represents an ability for
+## a player character.
 @tool
 class_name PlayerAbility
 extends Node2D
 
 
-## Called when the ability is used
-signal used
+## Called when the ability button is pressed
+signal used_pressed
+## Called when the ability button is released
+signal used_released
 ## Called when the cooldown is over
 signal cooldown_over
 
@@ -18,8 +22,10 @@ signal cooldown_over
 		if Engine.is_editor_hint():
 			name = (PlayerInput.AbilityType.find_key(type) as String).to_pascal_case()
 @export var cooldown: float
-@export var use_on_pressed: bool = true
-@export var use_while_pressed: bool = true
+## Whether the ability button is pressed down
+var is_used_pressed: bool :
+	get:
+		return player_input.is_ability_used(type)
 
 
 var on_cooldown: bool :
@@ -35,25 +41,21 @@ func _ready():
 	player_input.on_ability_used.connect(_on_ability_used)
 
 
-func _on_ability_used(ability_type: PlayerInput.AbilityType):
-	if ability_type == type and use_on_pressed:
-		use()
+func _on_ability_used(ability_type: PlayerInput.AbilityType, pressed: bool):
+	if ability_type == type:
+		if pressed:
+			used_pressed.emit()
+		else:
+			used_released.emit()
 
 
-func use():
-	if on_cooldown:
-		return
+## Stars the cooldown for this ability
+func start_cooldown():
 	_cooldown_timer = cooldown
 	set_process(true)
-	used.emit()
-	for child in get_children():
-		if child is SpawnProjectiles:
-			child.spawn()
 
 
 func _process(delta):
-	if use_while_pressed and player_input.is_ability_used(type):
-		use()
 	if _cooldown_timer >= 0:
 		_cooldown_timer -= delta
 		if _cooldown_timer < 0:
