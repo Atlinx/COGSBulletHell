@@ -32,7 +32,6 @@ func _ready():
 		local_data.team = team.team
 		local_data.entity_owner = team.entity_owner.get_path() if is_instance_valid(team.entity_owner) else null
 		local_data.entity_owner_data = team.entity_owner_data
-		print("local data: ", JSON.stringify(local_data, "  "))
 
 
 func spawn_projectile(prefab: PackedScene, data: Dictionary):

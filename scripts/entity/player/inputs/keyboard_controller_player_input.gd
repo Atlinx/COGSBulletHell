@@ -11,7 +11,7 @@ enum Mode {
 	CONTROLLER
 }
 
-var _mouse_inside: bool
+var _mouse_inside: bool = true
 var joy_device_id: int
 var mode: Mode :
 	get:
@@ -86,3 +86,9 @@ func _process(delta):
 		var stick_direction = Vector2(Input.get_joy_axis(joy_device_id, JOY_AXIS_RIGHT_X), Input.get_joy_axis(joy_device_id, JOY_AXIS_RIGHT_Y))
 		if stick_direction.length_squared() > 0.5 * 0.5:
 			player_input.aim_direction = stick_direction.normalized()
+	
+	# Zoom
+	if Input.is_action_just_pressed("player_zoom_in"):
+		manual_player.camera_zoom *= 1.1
+	elif Input.is_action_just_pressed("player_zoom_out"):
+		manual_player.camera_zoom /= 1.1

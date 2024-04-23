@@ -9,7 +9,7 @@ signal is_moving_changed(moving: bool)
 
 
 @export var speed: float = 500;
-@export var visuals: Sprite2D
+@export var visuals_container: Node2D
 @export var input: PlayerInput
 @export var collision_shape: CollisionShape2D
 ## Factor that contorls How much player's position
@@ -86,7 +86,7 @@ func _ready():
 
 
 func _start_interpolate_to_server_pos():
-	var start_pos = visuals.global_position if network_manager.is_player_server else player.global_position
+	var start_pos = visuals_container.global_position if network_manager.is_player_server else player.global_position
 	var dist_to_dest = start_pos.distance_to(server_position)
 	if dist_to_dest > 2:
 		is_moving = true
@@ -108,12 +108,12 @@ func _process(delta):
 		_interpolate_timer -= delta
 		var amount = clampf(1.0 - _interpolate_timer / _interpolate_duration, 0.0, 1.0)
 		if network_manager.is_player_server and not player.is_controlling_player:
-			visuals.global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
+			visuals_container.global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
 		else:
 			player.global_position = _interpolate_start_pos.lerp(_interpolate_dest, amount)
 		if _interpolate_timer < 0:
 			if network_manager.is_player_server and not player.is_controlling_player:
-				visuals.global_position = _interpolate_dest
+				visuals_container.global_position = _interpolate_dest
 			else:
 				player.global_position = _interpolate_dest
 			_stop_moving_timer = max(stop_moving_duration_factor * network_manager.average_latency_ms, stop_moving_duration_min)
@@ -179,7 +179,7 @@ func _physics_process(delta):
 @rpc("any_peer", "call_remote", "reliable")
 func _sync_to_server(source_position: Vector2):
 	var motion = source_position - player.global_position
-	var orig_visual_position = visuals.global_position
+	var orig_visual_position = visuals_container.global_position
 	var collision = player.move_and_collide(motion)
 	var slide_count = 0
 	while collision and collision.get_remainder().length_squared() > 0 and slide_count < MAX_MOVE_AND_SLIDES: 
@@ -195,7 +195,7 @@ func _sync_to_server(source_position: Vector2):
 		slide_count += 1
 	server_position = player.global_position
 	if network_manager.is_player_server:
-		visuals.global_position = orig_visual_position
+		visuals_container.global_position = orig_visual_position
 		_start_interpolate_to_server_pos()
 
 

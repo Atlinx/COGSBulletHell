@@ -27,6 +27,7 @@ static var instance: NetworkManager
 @export var port: int = 9955
 @export var ping_interval: float = 1
 @export var ping_sample_count: int = 10
+@export var max_players: int = 8
 
 var peer: ENetMultiplayerPeer
 var game_state: GameState = GameState.IDLE
@@ -288,6 +289,9 @@ func _on_peer_connected(id: int):
 	print("Peer connected ", id)
 	if multiplayer.is_server():
 		if game_state == GameState.LOBBY:
+			if network_players.size() == max_players:
+				kick_player.rpc_id(id, "Lobby is full")
+				return
 			var _network_players = []
 			for player in network_players_list:
 				_network_players.append(player.to_dict())

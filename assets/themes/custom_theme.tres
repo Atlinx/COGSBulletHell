@@ -1,0 +1,41 @@
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://bgiqtp4uhrjn5"]
+
+[ext_resource type="FontFile" uid="uid://cux2x2xbcjsqc" path="res://assets/fonts/fat_pixel_font.ttf" id="1_2ryes"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pftyi"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v4qvl"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[resource]
+default_font = ExtResource("1_2ryes")
+default_font_size = 6
+Button/styles/normal = SubResource("StyleBoxFlat_pftyi")
+HBoxContainer/constants/separation = 8
+LineEdit/styles/normal = SubResource("StyleBoxFlat_v4qvl")
+MarginContainer/constants/margin_bottom = 24
+MarginContainer/constants/margin_left = 24
+MarginContainer/constants/margin_right = 24
+MarginContainer/constants/margin_top = 24
+VBoxContainer/constants/separation = 8

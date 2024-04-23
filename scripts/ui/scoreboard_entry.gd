@@ -1,9 +1,10 @@
 class_name ScoreboardEntry
-extends HSplitContainer
+extends HBoxContainer
 
 
 @export var player_color_rect: ColorRect
 @export var score_label: Label
+@export var username_label: Label
 
 var game_player: GameManager.GamePlayer
 var _score_tween: Tween
@@ -13,6 +14,7 @@ func construct(_game_player: GameManager.GamePlayer):
 	game_player = _game_player
 	player_color_rect.color = game_player.palette.color_2
 	score_label.text = str(0)
+	username_label.text = _game_player.network_player.username
 	game_player.score_updated.connect(_on_score_updated)
 
 

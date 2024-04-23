@@ -8,6 +8,7 @@ signal died(killing_damage_info: DamageInfo)
 @export var palette_swap: PaletteSwap
 @export var team: Team
 @export var health: Health
+@export var visuals_container: Node2D
 
 var palette: ColorPalette
 var game_player: GameManager.GamePlayer

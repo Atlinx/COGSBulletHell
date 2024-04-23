@@ -21,6 +21,8 @@ func _on_game_started():
 
 func transition_to_menu(menu_name: String):
 	for child: Control in get_children():
+		if child.name == "BG":
+			continue
 		var should_be_visible = child.name == menu_name
 		if child.visible and not should_be_visible and child.has_method("_on_menu_unload"):
 			child._on_menu_unload()

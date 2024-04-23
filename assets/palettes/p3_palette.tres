@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_7vi5i")
-color_1 = Color(0, 0, 0, 1)
-color_2 = Color(0, 0, 0, 1)
-color_3 = Color(0, 0, 0, 1)
+color_1 = Color(0.407843, 0.909804, 0.207843, 1)
+color_2 = Color(0.333333, 0.682353, 0.258824, 1)
+color_3 = Color(0.231373, 0.423529, 0.227451, 1)
 color_4 = Color(0, 0, 0, 1)

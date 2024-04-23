@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=24 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/levels/level_big.tscn" id="1_negoe"]
@@ -9,12 +9,20 @@
 [ext_resource type="PackedScene" uid="uid://clh6wi7v5ir4j" path="res://scenes/levels/level_small.tscn" id="2_ethu2"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="3_ltb6v"]
 [ext_resource type="Script" path="res://scripts/gameplay_ui.gd" id="4_lewxl"]
+[ext_resource type="Theme" uid="uid://bgiqtp4uhrjn5" path="res://assets/themes/custom_theme.tres" id="5_5xv67"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
 [ext_resource type="PackedScene" uid="uid://dwovq5jl3h058" path="res://scenes/player.tscn" id="6_qj4uo"]
+[ext_resource type="Texture2D" uid="uid://d1u57e7wtp2f2" path="res://assets/art/app/icon.png" id="7_avgvb"]
 [ext_resource type="PackedScene" uid="uid://cn7aloedpuwjr" path="res://scenes/ui/scoreboard_entry.tscn" id="8_y3w7w"]
 [ext_resource type="PackedScene" uid="uid://c5ah4utikwf8k" path="res://scenes/manual_player.tscn" id="12_206qu"]
 [ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="13_3ofs7"]
 [ext_resource type="Resource" uid="uid://dembgtbg6r00f" path="res://assets/palettes/p2_palette.tres" id="14_fdi5q"]
+[ext_resource type="Resource" uid="uid://bvuydkjiv6qdj" path="res://assets/palettes/p3_palette.tres" id="16_3lkbo"]
+[ext_resource type="Resource" uid="uid://cg650mhmubesb" path="res://assets/palettes/p4_palette.tres" id="17_o2b06"]
+[ext_resource type="Resource" uid="uid://ca3yc4rqlnxx8" path="res://assets/palettes/p5_palette.tres" id="18_g4vh6"]
+[ext_resource type="Resource" uid="uid://bejwh7pj8abon" path="res://assets/palettes/p6_palette.tres" id="19_ltbxw"]
+[ext_resource type="Resource" uid="uid://clkox4bdthvif" path="res://assets/palettes/p7_palette.tres" id="20_qxqyi"]
+[ext_resource type="Resource" uid="uid://c5flxja5iecmo" path="res://assets/palettes/p8_palette.tres" id="21_vb1lf"]
 
 [node name="Main" type="Node"]
 
@@ -34,17 +42,35 @@ script = ExtResource("3_ltb6v")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="MenuManager" type="Control" parent="UI" node_paths=PackedStringArray("network_manager")]
+[node name="UI" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_qh41f")
-network_manager = NodePath("../../NetworkManager")
+theme = ExtResource("5_5xv67")
 
-[node name="MainMenu" type="Control" parent="UI/MenuManager" node_paths=PackedStringArray("menu_manager", "network_manager", "ip_line_edit", "port_line_edit", "host_button", "join_button", "cancel_button")]
+[node name="MenuManager" type="Control" parent="UI/UI" node_paths=PackedStringArray("network_manager")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qh41f")
+network_manager = NodePath("../../../NetworkManager")
+
+[node name="BG" type="ColorRect" parent="UI/UI/MenuManager"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.184314, 0.203922, 0.380392, 1)
+
+[node name="MainMenu" type="Control" parent="UI/UI/MenuManager" node_paths=PackedStringArray("menu_manager", "network_manager", "ip_line_edit", "port_line_edit", "host_button", "join_button", "cancel_button")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,14 +79,14 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ok3ni")
 menu_manager = NodePath("..")
-network_manager = NodePath("../../../NetworkManager")
-ip_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer/IPLineEdit")
-port_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2/PortLineEdit")
-host_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3/HostButton")
-join_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3/JoinButton")
-cancel_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/CancelButton")
+network_manager = NodePath("../../../../NetworkManager")
+ip_line_edit = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer/IPLineEdit")
+port_line_edit = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer2/PortLineEdit")
+host_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3/HostButton")
+join_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3/JoinButton")
+cancel_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/CancelButton")
 
-[node name="PanelContainer" type="PanelContainer" parent="UI/MenuManager/MainMenu"]
+[node name="PanelContainer" type="PanelContainer" parent="UI/UI/MenuManager/MainMenu"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 1
 anchors_preset = 8
@@ -75,63 +101,70 @@ offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/MenuManager/MainMenu/PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer"]
 layout_mode = 2
-text = "Wizard Battle"
+theme_override_constants/separation = 32
+dragger_visibility = 1
 
-[node name="HSplitContainer" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer"]
+layout_mode = 2
+texture = ExtResource("7_avgvb")
+expand_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer"]
+[node name="Label" type="Label" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+text = "Bullet Battle"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer"]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 text = "IP"
 
-[node name="IPLineEdit" type="LineEdit" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer"]
+[node name="IPLineEdit" type="LineEdit" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer"]
 layout_mode = 2
 text = "localhost"
 
-[node name="HSplitContainer2" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HSplitContainer2" type="HSplitContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2"]
+[node name="Label" type="Label" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer2"]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 text = "Port"
 
-[node name="PortLineEdit" type="LineEdit" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer2"]
+[node name="PortLineEdit" type="LineEdit" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer2"]
 layout_mode = 2
 text = "9955"
 
-[node name="HSplitContainer3" type="HSplitContainer" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HSplitContainer3" type="HSplitContainer" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HostButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3"]
+[node name="HostButton" type="Button" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Host"
 
-[node name="JoinButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer/HSplitContainer3"]
+[node name="JoinButton" type="Button" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Join"
 
-[node name="CancelButton" type="Button" parent="UI/MenuManager/MainMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="CancelButton" type="Button" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Cancel"
 
-[node name="Lobby" type="Control" parent="UI/MenuManager" node_paths=PackedStringArray("network_manager", "ready_button", "leave_button", "lobby_info_label", "lobby_users_label", "username_line_edit")]
+[node name="Lobby" type="Control" parent="UI/UI/MenuManager" node_paths=PackedStringArray("network_manager", "ready_button", "leave_button", "lobby_info_label", "lobby_users_label", "username_line_edit")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -140,14 +173,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_6kl11")
-network_manager = NodePath("../../../NetworkManager")
+network_manager = NodePath("../../../../NetworkManager")
 ready_button = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/ReadyButton")
 leave_button = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/LeaveButton")
 lobby_info_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/LobbyInfoLabel")
 lobby_users_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/LobbyUsersLabel")
 username_line_edit = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer/UsernameLineEdit")
 
-[node name="PanelContainer" type="PanelContainer" parent="UI/MenuManager/Lobby"]
+[node name="PanelContainer" type="PanelContainer" parent="UI/UI/MenuManager/Lobby"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 1
 anchors_preset = 8
@@ -162,71 +195,67 @@ offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/MenuManager/Lobby/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/MenuManager/Lobby/PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+[node name="Label" type="Label" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
 layout_mode = 2
-text = "Wizard Battle Lobby"
+text = "Lobby"
 
-[node name="LobbyInfoLabel" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+[node name="LobbyInfoLabel" type="Label" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "Lobby Info"
+
+[node name="LobbyUsersLabel" type="Label" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
 layout_mode = 2
 size_flags_vertical = 6
 text = "[3]: 192.234
 [3]: 192.234"
 
-[node name="LobbyUsersLabel" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
-layout_mode = 2
-size_flags_vertical = 6
-text = "[3]: 192.234
-[3]: 192.234"
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="HSplitContainer" type="HSplitContainer" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+dragger_visibility = 1
+
+[node name="Label" type="Label" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
 layout_mode = 2
 text = "Username"
 
-[node name="UsernameLineEdit" type="LineEdit" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
+[node name="UsernameLineEdit" type="LineEdit" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2/HSplitContainer"]
 layout_mode = 2
 
-[node name="ReadyButton" type="Button" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+[node name="ReadyButton" type="Button" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
 layout_mode = 2
 text = "Ready"
 
-[node name="LeaveButton" type="Button" parent="UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
+[node name="LeaveButton" type="Button" parent="UI/UI/MenuManager/Lobby/PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer2"]
 layout_mode = 2
 text = "Leave"
 
-[node name="GameplayUI" type="Control" parent="UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button", "scoreboard")]
-layout_mode = 3
+[node name="GameplayUI" type="Control" parent="UI/UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button", "scoreboard")]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_lewxl")
-network_manager = NodePath("../../NetworkManager")
-game_manager = NodePath("../../GameManager")
+network_manager = NodePath("../../../NetworkManager")
+game_manager = NodePath("../../../GameManager")
 info_label = NodePath("MarginContainer/VBoxContainer/InfoLabel")
 disconnect_button = NodePath("MarginContainer/VBoxContainer/DisconnectButton")
 scoreboard_entry_prefab = ExtResource("8_y3w7w")
 scoreboard = NodePath("MarginContainer2/VBoxContainer/ScoreboardContainer")
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/GameplayUI"]
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -235,19 +264,19 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameplayUI/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer"]
 layout_mode = 2
 
-[node name="DisconnectButton" type="Button" parent="UI/GameplayUI/MarginContainer/VBoxContainer"]
+[node name="DisconnectButton" type="Button" parent="UI/UI/GameplayUI/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 text = "Disconnect"
 
-[node name="InfoLabel" type="Label" parent="UI/GameplayUI/MarginContainer/VBoxContainer"]
+[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Player 11"
 
-[node name="MarginContainer2" type="MarginContainer" parent="UI/GameplayUI"]
+[node name="MarginContainer2" type="MarginContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -260,17 +289,18 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameplayUI/MarginContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer2"]
 layout_mode = 2
+theme_override_constants/separation = 16
 
-[node name="InfoLabel" type="Label" parent="UI/GameplayUI/MarginContainer2/VBoxContainer"]
+[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer"]
 layout_mode = 2
 text = "Scoreboard"
 
-[node name="ScoreboardContainer" type="VBoxContainer" parent="UI/GameplayUI/MarginContainer2/VBoxContainer"]
+[node name="ScoreboardContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer"]
 layout_mode = 2
 
-[node name="HSplitContainer" parent="UI/GameplayUI/MarginContainer2/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
+[node name="HSplitContainer" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
 layout_mode = 2
 
 [node name="NetworkManager" type="Node" parent="."]
@@ -283,4 +313,4 @@ network_manager = NodePath("../NetworkManager")
 level_manager = NodePath("../LevelManager")
 player_prefab = ExtResource("6_qj4uo")
 manual_player_prefab = ExtResource("12_206qu")
-color_palettes = Array[Resource("res://scripts/color_palette.gd")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q")])
+color_palettes = Array[Resource("res://scripts/color_palette.gd")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q"), ExtResource("16_3lkbo"), ExtResource("17_o2b06"), ExtResource("18_g4vh6"), ExtResource("19_ltbxw"), ExtResource("20_qxqyi"), ExtResource("21_vb1lf")])

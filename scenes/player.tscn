@@ -105,35 +105,38 @@ damping_min = 70.0
 damping_max = 70.0
 scale_curve = SubResource("CurveTexture_m5qes")
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("palette_swap", "team", "health")]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("palette_swap", "team", "health", "visuals_container")]
 collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_mmakg")
 palette_swap = NodePath("PlayerPaletteSwap")
 team = NodePath("Team")
 health = NodePath("Health")
+visuals_container = NodePath("VisualsContainer")
 
 [node name="ActualPosIndicator" type="Sprite2D" parent="."]
 visible = false
 self_modulate = Color(0, 0, 0, 0.211765)
 texture = ExtResource("1_mtwg5")
 
-[node name="Visuals" type="Sprite2D" parent="."]
+[node name="VisualsContainer" type="Node2D" parent="."]
+
+[node name="PlayerGlow" type="Sprite2D" parent="VisualsContainer"]
+self_modulate = Color(0.231373, 0.368627, 0.631373, 0.392157)
+z_index = -10
+scale = Vector2(2, 2)
+texture = ExtResource("3_32bgw")
+
+[node name="Visuals" type="Sprite2D" parent="VisualsContainer"]
 material = SubResource("ShaderMaterial_1u1l7")
 texture = ExtResource("4_xp1qm")
 
-[node name="OverlayFX" type="Node" parent="Visuals" node_paths=PackedStringArray("visuals")]
+[node name="OverlayFX" type="Node" parent="VisualsContainer/Visuals" node_paths=PackedStringArray("visuals")]
 script = ExtResource("3_734co")
 visuals = NodePath("..")
 ease = 1
 transition = 7
 duration = 0.25
-
-[node name="PlayerGlow" type="Sprite2D" parent="Visuals"]
-self_modulate = Color(0.231373, 0.368627, 0.631373, 0.392157)
-z_index = -10
-scale = Vector2(2, 2)
-texture = ExtResource("3_32bgw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
@@ -252,14 +255,14 @@ local_coords = true
 
 [node name="PlayerAim" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "fire_rotation", "muzzle")]
 script = ExtResource("16_hyj00")
-visuals = NodePath("../Visuals")
+visuals = NodePath("../VisualsContainer/Visuals")
 input = NodePath("../PlayerInput")
 fire_rotation = NodePath("../FireRotation")
 muzzle = NodePath("../FireRotation/Muzzle")
 
-[node name="PlayerMove" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "collision_shape")]
+[node name="PlayerMove" type="Node" parent="." node_paths=PackedStringArray("visuals_container", "input", "collision_shape")]
 script = ExtResource("16_n30vn")
-visuals = NodePath("../Visuals")
+visuals_container = NodePath("../VisualsContainer")
 input = NodePath("../PlayerInput")
 collision_shape = NodePath("../CollisionShape2D")
 
@@ -268,13 +271,13 @@ script = ExtResource("17_tqdpq")
 
 [node name="PlayerPaletteSwap" type="Node" parent="." node_paths=PackedStringArray("visuals", "self_modulate_0")]
 script = ExtResource("18_lmg5v")
-visuals = [NodePath("../Visuals")]
+visuals = [NodePath("../VisualsContainer/Visuals")]
 self_modulate_0 = [NodePath("../FireRotation/Muzzle/ShootFX/ShootGPUParticles2D"), NodePath("../Destroy/DeathFX/DeathGPUParticles2D"), NodePath("../PlayerShooting/Secondary/SecondaryCDFX/SecondaryCDParticleFX")]
 
 [node name="GlowPaletteSwap" type="Node" parent="PlayerPaletteSwap" node_paths=PackedStringArray("self_modulate_0")]
 script = ExtResource("18_lmg5v")
-self_modulate_0 = [NodePath("../../Visuals/PlayerGlow")]
-modulate = Color(1, 1, 1, 0.364706)
+self_modulate_0 = [NodePath("../../VisualsContainer/PlayerGlow")]
+modulate = Color(1, 1, 1, 0.196078)
 
 [node name="PlayerAnimationPlayer" type="AnimationPlayer" parent="." node_paths=PackedStringArray("player_move")]
 libraries = {
@@ -304,7 +307,7 @@ lifetime = 0.5
 one_shot = true
 explosiveness = 0.8
 
-[connection signal="damaged" from="Health" to="Visuals/OverlayFX" method="play" unbinds=1]
+[connection signal="damaged" from="Health" to="VisualsContainer/Visuals/OverlayFX" method="play" unbinds=1]
 [connection signal="died" from="Health" to="Destroy" method="destroy" unbinds=1]
 [connection signal="on_spawn" from="ProjectileManager" to="FireRotation/Muzzle/ShootFX" method="play"]
 [connection signal="cooldown_over" from="PlayerShooting/Secondary" to="PlayerShooting/Secondary/SecondaryCDFX" method="play"]

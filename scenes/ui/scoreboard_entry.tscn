@@ -2,15 +2,23 @@
 
 [ext_resource type="Script" path="res://scripts/ui/scoreboard_entry.gd" id="1_jnycv"]
 
-[node name="ScoreboardEntry" type="HSplitContainer" node_paths=PackedStringArray("player_color_rect", "score_label")]
+[node name="ScoreboardEntry" type="HBoxContainer" node_paths=PackedStringArray("player_color_rect", "score_label", "username_label")]
 script = ExtResource("1_jnycv")
 player_color_rect = NodePath("TextureRect")
-score_label = NodePath("Label")
+score_label = NodePath("ScoreLabel")
+username_label = NodePath("UsernameLabel")
 
 [node name="TextureRect" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="."]
+[node name="UsernameLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "user"
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="ScoreLabel" type="Label" parent="."]
 layout_mode = 2
 text = "10"

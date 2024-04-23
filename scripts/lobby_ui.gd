@@ -32,11 +32,11 @@ func _on_game_reseted():
 
 func _on_username_changed(new_text: String):
 	var my_network_player = network_manager.my_network_player
-	if new_text.length() > 3 and new_text != my_network_player.username:
+	if new_text.length() > 3 and new_text.length() <= 20 and new_text != my_network_player.username:
 		my_network_player.username = new_text
 		network_manager.update_my_network_player()
 	else:
-		print("Username must be > 3 length")
+		print("Username must be > 3 and <= 20 length")
 
 
 func _on_network_players_updated():
