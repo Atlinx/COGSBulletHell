@@ -5,7 +5,7 @@
 [node name="ScoreboardEntry" type="HBoxContainer" node_paths=PackedStringArray("player_color_rect", "score_label", "username_label")]
 script = ExtResource("1_jnycv")
 player_color_rect = NodePath("TextureRect")
-score_label = NodePath("ScoreLabel")
+score_label = NodePath("ScoreContainer/ScoreLabel")
 username_label = NodePath("UsernameLabel")
 
 [node name="TextureRect" type="ColorRect" parent="."]
@@ -19,6 +19,14 @@ text = "user"
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="ScoreLabel" type="Label" parent="."]
+[node name="ScoreContainer" type="Control" parent="."]
+custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
+
+[node name="ScoreLabel" type="Label" parent="ScoreContainer"]
+layout_mode = 2
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 23.0
+offset_bottom = 27.0
 text = "10"

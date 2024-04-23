@@ -33,7 +33,7 @@ func _ready():
 		_update_joypad_id()
 
 
-func _on_joy_connection_changed(device: int, connected: bool):
+func _on_joy_connection_changed(_device: int, _connected: bool):
 	_update_joypad_id()
 
 
@@ -52,7 +52,7 @@ func _notification(what):
 		_mouse_inside = false
 
 
-func _process(delta):
+func _process(_delta):
 	# Moving
 	var move_direction = Vector2.ZERO
 	if joy_device_id >= 0:
@@ -74,7 +74,7 @@ func _process(delta):
 	player_input.is_using_secondary = (_mouse_inside and Input.is_action_pressed("player_secondary")) or (Input.get_joy_axis(joy_device_id, JOY_AXIS_TRIGGER_LEFT) > 0.5)
 	
 	# Utility
-	player_input.is_using_utility = (_mouse_inside and Input.is_action_pressed("player_secondary")) or (Input.is_joy_button_pressed(joy_device_id, JOY_BUTTON_LEFT_SHOULDER))
+	player_input.is_using_utility = (_mouse_inside and Input.is_action_pressed("player_utility")) or (Input.is_joy_button_pressed(joy_device_id, JOY_BUTTON_LEFT_SHOULDER))
 	
 	# Special
 	player_input.is_using_special = (_mouse_inside and Input.is_action_pressed("player_special")) or (Input.is_joy_button_pressed(joy_device_id, JOY_BUTTON_RIGHT_SHOULDER))

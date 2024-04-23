@@ -24,5 +24,5 @@ func _on_score_updated(amount: int):
 		_score_tween.kill()
 	_score_tween = create_tween()
 	_score_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	self.scale = Vector2(1.5, 1.5)
-	_score_tween.tween_property(self, "scale", Vector2.ONE, 0.5)
+	score_label.scale = Vector2(1.5, 1.5)
+	_score_tween.tween_property(score_label, "scale", Vector2(1.0, 1.0), 0.5)

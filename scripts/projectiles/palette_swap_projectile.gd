@@ -20,14 +20,14 @@ func _ready():
 		if _palette:
 			_set_palette(_palette)
 		return
-	var palette = load(projectile.data.get("palette"))
-	if palette:
-		_set_palette(palette)
+	var data_palette = load(projectile.data.get("palette"))
+	if data_palette:
+		_set_palette(data_palette)
 
 
-func _set_palette(palette: ColorPalette):
-	_palette = palette
+func _set_palette(new_palette: ColorPalette):
+	_palette = new_palette
 	if _palette:
 		for child in get_children():
 			if child is PaletteSwap:
-				child.use_palette(palette)
+				child.use_palette(new_palette)

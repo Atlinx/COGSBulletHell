@@ -28,6 +28,11 @@ static var instance: NetworkManager
 @export var ping_interval: float = 1
 @export var ping_sample_count: int = 10
 @export var max_players: int = 8
+@export_group("Verification")
+@export var acceptable_time_diff_factor: float = 7 # ms
+@export var acceptable_time_diff_min: float = 8 # ms
+@export var acceptable_position_diff_factor: float = 0.05 # pixels * ms
+@export var acceptable_position_diff_min: float = 32 # pixels
 
 var peer: ENetMultiplayerPeer
 var game_state: GameState = GameState.IDLE
@@ -90,7 +95,8 @@ var server_time_offset_ms: float
 
 
 var _ping_timer: float
-var _ping_samples: PackedFloat32Array
+## Used by client to track average latency to server
+var _rtt_samples: PackedFloat32Array
 var _readied_player_count: int :
 	get:
 		var count = 0
@@ -98,13 +104,50 @@ var _readied_player_count: int :
 			if player.readied_up:
 				count += 1
 		return count
+## Whether the client's connection to the server was approved
+## Connectins are only approved when the server is in the lobby 
+## and waiting for new players.
 var _connection_approved: bool
-
+## Used by server to keep track of individual ping packets
+var _ping_id: int
+## Dictionary of peers waiting to be approved
+## [peer_id: int]: { [peer_id]: null } (Peers that have received it's approval)
+var _peers_waiting_approval: Dictionary = {}
 
 class NetworkPlayer extends RefCounted:
 	var multiplayer_id: int
 	var username: String
 	var readied_up: bool
+	var average_rtt: float :
+		get:
+			return average_rtt_ms / 1000
+	var average_latency: float :
+		get:
+			return average_latency_ms / 1000
+	## Only used by the server to keep track of client rtt
+	var average_rtt_ms: float
+	var average_latency_ms: float :
+		get:
+			return average_rtt_ms / 2.0
+	## Used by server to calculate RTT for clients
+	var rtt_samples: PackedFloat32Array
+	## Used by server to keep track of last acknowledged ping packet
+	var last_acknowledged_ping_id: int = -1
+	## Used by server to keep track of unacknowledged ping packet and 
+	## their start times
+	## [ping_id: int]: float (ping start time)
+	var unacknowledged_pings: Dictionary
+	
+	
+	func update_rtt(rtt_ms: float, ping_sample_limit: int):
+		rtt_samples.push_back(rtt_ms)
+		if rtt_samples.size() > ping_sample_limit:
+			rtt_samples.remove_at(0)
+		average_rtt_ms = 0
+		for sample in rtt_samples:
+			average_rtt_ms += sample
+		average_rtt_ms /= rtt_samples.size()
+	
 	
 	func to_dict() -> Dictionary:
 		return {
@@ -113,12 +156,10 @@ class NetworkPlayer extends RefCounted:
 			"readied_up": readied_up
 		}
 	
-	static func from_dict(dict: Dictionary) -> NetworkPlayer:
-		var lobby_player = NetworkPlayer.new()
-		lobby_player.multiplayer_id = dict.get("multiplayer_id")
-		lobby_player.username = dict.get("username")
-		lobby_player.readied_up = dict.get("readied_up")
-		return lobby_player
+	func from_dict(dict: Dictionary):
+		multiplayer_id = dict.get("multiplayer_id")
+		username = dict.get("username")
+		readied_up = dict.get("readied_up")
 
 
 # [multiplayer_id: int]: NetworkPlayer
@@ -206,9 +247,16 @@ func update_my_network_player():
 
 @rpc("any_peer", "call_local", "reliable")
 func update_network_player(network_player_dict: Dictionary):
+	var multiplayer_id = network_player_dict.get("multiplayer_id")
+	if not multiplayer_id in network_players or multiplayer_id != multiplayer.get_remote_sender_id():
+		# Don't accept network players from unapproved peers
+		# Only approved peers will exist in the network_player_dict
+		#
+		# Don't let peers modify NetworkPlayers that aren't their own
+		return
 	if multiplayer.get_remote_sender_id() != multiplayer.get_unique_id():
-		var network_player = NetworkPlayer.from_dict(network_player_dict)
-		network_players[network_player.multiplayer_id] = network_player
+		# We're receiving someone else's network player update
+		get_player(multiplayer_id).from_dict(network_player_dict)
 	network_players_updated.emit()
 
 
@@ -222,19 +270,78 @@ func get_player(player_id: int) -> NetworkPlayer:
 	return network_players[player_id] as NetworkPlayer
 
 
-func client_to_server_time(client_time_ms: float):
-	return client_time_ms + server_time_offset_ms
+func client_to_server_time(_client_time_ms: float):
+	return _client_time_ms + server_time_offset_ms
 
 
 ## Checks if a client and server time difference is within
 ## acceptable levels. 
 ##
-## This  is used for netcode that requires clients to send 
+## This is used for netcode that requires clients to send 
 ## their start time of a given action. We don't want
 ## client to spoof their start time too far back in the past
 ## or to spoof their time into the future. 
-func is_acceptable_time_diff(time_diff: float) -> bool:
-	return time_diff >= 0 and time_diff < average_latency * 2
+func is_acceptable_time_diff(peer_id: int, time_diff: float) -> bool:
+	return is_acceptable_time_diff_ms(peer_id, time_diff * 1000)
+
+
+## Checks if a client and server time difference is within
+## acceptable levels. 
+##
+## This is used for netcode that requires clients to send 
+## their start time of a given action. We don't want
+## client to spoof their start time too far back in the past
+## or to spoof their time into the future. 
+func is_acceptable_time_diff_ms(peer_id: int, time_diff_ms: float) -> bool:
+	var time_diff_limit = acceptable_time_diff_ms(peer_id)
+	if abs(time_diff_ms) >= time_diff_limit:
+		print("Unacceptable time diff: ", time_diff_ms, " abs limit: ", time_diff_limit)
+	return abs(time_diff_ms) < time_diff_limit
+
+
+## Returns the allowable time difference between
+## a client and server entity.
+##
+## This is used for netcode that requires clients to send 
+## their start time of a given action. We don't want
+## client to spoof their start time too far back in the past
+## or to spoof their time into the future. 
+func acceptable_time_diff(peer_id: int) -> float:
+	return acceptable_time_diff_ms(peer_id) / 1000
+
+
+## Returns the allowable time difference between
+## a client and server entity.
+##
+## This is used for netcode that requires clients to send 
+## their start time of a given action. We don't want
+## client to spoof their start time too far back in the past
+## or to spoof their time into the future. 
+func acceptable_time_diff_ms(peer_id: int) -> float:
+	return max(get_player(peer_id).average_latency_ms * acceptable_time_diff_factor, acceptable_time_diff_min)
+
+
+## Checks if a client and server entity's position difference is within
+## acceptable levels, given the speed the entity was traveling at.
+##
+## This is used for netcode that requires clients to send 
+## their start position of a given action. We don't want
+## client to spoof their start position to far from
+## their current position. 
+func is_acceptable_position_diff(peer_id: int, position_diff_sqr: float, speed: float) -> bool:
+	var factor = acceptable_position_diff(peer_id, speed)
+	return position_diff_sqr < factor * factor
+
+
+## Returns the allowable position difference
+## between a client and server entity, given a speed.
+##
+## This is used for netcode that requires clients to send 
+## their start position of a given action. We don't want
+## client to spoof their start position to far from
+## their current position. 
+func acceptable_position_diff(peer_id: int, speed: float) -> float:
+	return max(get_player(peer_id).average_latency_ms * acceptable_position_diff_factor * speed, acceptable_position_diff_min)
 
 
 func reset_game():
@@ -247,33 +354,62 @@ func reset_game():
 	average_rtt_ms = 0
 	server_time_offset_ms = 0
 	_connection_approved = false
+	_peers_waiting_approval = {}
 
 
 func _process(delta):
 	client_time_ms += delta * 1000
-	if game_state != GameState.IDLE and not multiplayer.is_server():
-		_ping_timer -= delta
-		if _ping_timer <= 0:
-			_ping.rpc_id(1, client_time_ms)
-			_ping_timer = ping_interval
+	if game_state != GameState.IDLE:
+		if multiplayer.is_server():
+			# Ping clients to establish latency
+			_ping_timer -= delta
+			if _ping_timer <= 0:
+				_ping_prepare()
+				_ping_timer = ping_interval
 
 
-@rpc("any_peer", "call_remote", "reliable")
-func _ping(start_time: float):
-	_ping_response.rpc_id(multiplayer.get_remote_sender_id(), start_time, client_time_ms)
+## Ping step 1: Server records new ping and send it to clients
+func _ping_prepare():
+	var start_time = client_time_ms
+	for network_player: NetworkPlayer in network_players.values():
+		network_player.unacknowledged_pings[_ping_id] = start_time
+	_ping.rpc(_ping_id)
+	_ping_id += 1
 
 
+## Ping step 2: Client responds to ping request
 @rpc("authority", "call_remote", "reliable")
-func _ping_response(start_time: float, _server_time: float):
-	var end_time = client_time_ms
-	_ping_samples.push_back(end_time - start_time)
-	if _ping_samples.size() > ping_sample_count:
-		_ping_samples.remove_at(0)
+func _ping(ping_id: int):
+	for network_player: NetworkPlayer in network_players.values():
+		_ping_response.rpc_id(network_player.multiplayer_id, client_time_ms, ping_id)
+
+
+## Ping step 3: Server responds to client's response to the ping request, 
+## which is received on the client
+@rpc("any_peer", "call_remote", "reliable")
+func _ping_response(start_time_ms: float, ping_id: int):
+	var player = get_player(multiplayer.get_remote_sender_id())
+	if not ping_id in player.unacknowledged_pings or ping_id != (player.last_acknowledged_ping_id + 1):
+		kick_player.rpc_id(player.multiplayer_id, "Invalid ping response")
+		return
+	var rtt_ms = client_time_ms - player.unacknowledged_pings.get(ping_id)
+	player.update_rtt(rtt_ms, ping_sample_count)
+	player.last_acknowledged_ping_id += 1
+	_ping_response_response.rpc_id(multiplayer.get_remote_sender_id(), start_time_ms, client_time_ms)
+
+
+## Ping step 4: Client receives server's response
+@rpc("authority", "call_remote", "reliable")
+func _ping_response_response(start_time_ms: float, _server_time_ms: float):
+	var rtt_ms = max(client_time_ms - start_time_ms, 0)
+	_rtt_samples.push_back(rtt_ms)
+	if _rtt_samples.size() > ping_sample_count:
+		_rtt_samples.remove_at(0)
 	average_rtt_ms = 0
-	for sample in _ping_samples:
+	for sample in _rtt_samples:
 		average_rtt_ms += sample
-	average_rtt_ms /= _ping_samples.size()
-	server_time_offset_ms = _server_time + average_rtt_ms - client_time_ms
+	average_rtt_ms /= _rtt_samples.size()
+	server_time_offset_ms = _server_time_ms + average_latency_ms - client_time_ms
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -282,16 +418,49 @@ func _on_connection_to_server_approved(_network_players: Array):
 	_connection_approved = true
 	game_state = GameState.LOBBY
 	for network_player: Dictionary in _network_players:
-		var player = NetworkPlayer.from_dict(network_player)
+		var player = NetworkPlayer.new()
+		player.from_dict(network_player)
 		network_players[player.multiplayer_id] = player
 	# Send all clients your info
-	var my_network_player = NetworkPlayer.new()
-	my_network_player.multiplayer_id = multiplayer.get_unique_id()
-	my_network_player.readied_up = false
-	my_network_player.username = "Player" + str(multiplayer.get_unique_id())
-	network_players[my_network_player.multiplayer_id] = my_network_player
+	var _my_network_player = NetworkPlayer.new()
+	_my_network_player.multiplayer_id = multiplayer.get_unique_id()
+	_my_network_player.readied_up = false
+	_my_network_player.username = "Player" + str(multiplayer.get_unique_id())
+	network_players[_my_network_player.multiplayer_id] = _my_network_player
 	update_my_network_player()
 	connected_to_server.emit()
+
+
+@rpc("authority", "call_local", "reliable")
+func _notify_peer_approved(peer_id: int):
+	var new_network_player = NetworkPlayer.new()
+	new_network_player.multiplayer_id = peer_id
+	network_players[peer_id] = new_network_player
+	_notify_peer_approved_acknowledged.rpc_id(1, peer_id)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _notify_peer_approved_acknowledged(peer_id: int):
+	if not multiplayer.get_remote_sender_id() in network_players:
+		# We can't let unapproved peers approve themselves
+		return
+	if is_server:
+		_peers_waiting_approval[peer_id][multiplayer.get_remote_sender_id()] = null
+		if _peers_waiting_approval[peer_id].size() == network_players.size():
+			# Everyone has received approval of the new peer,
+			# and can now start interacting with it 
+			_peers_waiting_approval.erase(peer_id)
+			
+			# Finally, we can send a connection approved message
+			# to the new peer to tell them they can start talking
+			# with other peers
+			var _network_players = []
+			for player in network_players_list:
+				_network_players.append(player.to_dict())
+			
+			# Reset the ping ack counter since we've now approved of the player
+			get_player(peer_id).last_acknowledged_ping_id = _ping_id - 1
+			_on_connection_to_server_approved.rpc_id(peer_id, _network_players)
 
 
 func _on_peer_connected(id: int):
@@ -303,14 +472,12 @@ func _on_peer_connected(id: int):
 			if network_players.size() == max_players:
 				kick_player.rpc_id(id, "Lobby is full")
 				return
-			var _network_players = []
-			for player in network_players_list:
-				_network_players.append(player.to_dict())
-			_on_connection_to_server_approved.rpc_id(id, _network_players)
+			_peers_waiting_approval[id] = { 1: null }
+			# Notify existing peers that new peer has been approved
+			_notify_peer_approved.rpc(id)
 		else:
 			kick_player.rpc_id(id, "Game already in progress")
 			return
-	update_network_player.rpc_id(id, my_network_player.to_dict())
 
 
 func _on_peer_disconnected(id: int):
@@ -321,7 +488,7 @@ func _on_peer_disconnected(id: int):
 	network_players_updated.emit()
 	
 	if is_server and game_state == GameState.IN_GAME:
-		# tODO: Handle quitting mid game gracefully
+		# TODO: Handle quitting mid game gracefully
 		reset_game()
 
 

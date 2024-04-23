@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=47 format=3 uid="uid://dwovq5jl3h058"]
 
 [ext_resource type="Script" path="res://scripts/entity/player/player.gd" id="1_mmakg"]
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
@@ -30,6 +30,7 @@
 [ext_resource type="Script" path="res://scripts/entity/player/player_animation_player.gd" id="20_qpu25"]
 [ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="21_l70jj"]
 [ext_resource type="Script" path="res://scripts/projectiles/manual_activate_source.gd" id="22_85sgm"]
+[ext_resource type="Script" path="res://scripts/entity/player/player_spawn_projectiles.gd" id="22_so6c5"]
 [ext_resource type="Texture2D" uid="uid://dc236m2hrwthv" path="res://assets/art/fx/64_star_fx.png" id="23_jxqk7"]
 [ext_resource type="Script" path="res://scripts/entity/player/abilities/teleport_ability.gd" id="24_bgcfl"]
 
@@ -175,6 +176,8 @@ repeat_oneshot = true
 self_modulate = Color(1, 1, 1, 0.313726)
 texture = ExtResource("9_mqncq")
 
+[node name="MuzzleTip" type="Node2D" parent="FireRotation/Muzzle"]
+
 [node name="HurtBox" type="Area2D" parent="." node_paths=PackedStringArray("entity")]
 visible = false
 script = ExtResource("5_3w5l7")
@@ -220,14 +223,20 @@ script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 cooldown = 1.0
 
-[node name="BasicAbility" type="Node" parent="Abilities/Primary"]
+[node name="BasicAbility" type="Node" parent="Abilities/Primary" node_paths=PackedStringArray("player")]
 script = ExtResource("20_fr7uk")
 use_on_released = false
+player = NodePath("../../..")
 
-[node name="SpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility" node_paths=PackedStringArray("spawn_projectiles", "player")]
+script = ExtResource("22_so6c5")
+spawn_projectiles = NodePath("SpawnProjectiles")
+player = NodePath("../../../..")
+
+[node name="SpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility/PlayerSpawnProjectiles" node_paths=PackedStringArray("projectile_manager", "muzzle")]
 script = ExtResource("16_rkx3d")
-projectile_manager = NodePath("../../../../ProjectileManager")
-muzzle = NodePath("../../../../FireRotation/Muzzle")
+projectile_manager = NodePath("../../../../../ProjectileManager")
+muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 amount = 1
 rounds = 3
 round_interval = 0.1
@@ -241,19 +250,25 @@ player_input = NodePath("../../PlayerInput")
 type = 1
 cooldown = 3.0
 
-[node name="BasicAbility" type="Node" parent="Abilities/Secondary"]
+[node name="BasicAbility" type="Node" parent="Abilities/Secondary" node_paths=PackedStringArray("player")]
 script = ExtResource("20_fr7uk")
 use_on_released = false
 use_while_pressed = false
+player = NodePath("../../..")
 
-[node name="SpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility" node_paths=PackedStringArray("spawn_projectiles", "player")]
+script = ExtResource("22_so6c5")
+spawn_projectiles = NodePath("SpawnProjectiles")
+player = NodePath("../../../..")
+
+[node name="SpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles" node_paths=PackedStringArray("projectile_manager", "muzzle")]
 script = ExtResource("16_rkx3d")
-projectile_manager = NodePath("../../../../ProjectileManager")
-muzzle = NodePath("../../../../FireRotation/Muzzle")
+projectile_manager = NodePath("../../../../../ProjectileManager")
+muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 prefab_index = 1
 amount = 1
 
-[node name="ManualDetonateSource" type="Node" parent="Abilities/Secondary/BasicAbility/SpawnProjectiles"]
+[node name="ManualDetonateSource" type="Node" parent="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles/SpawnProjectiles"]
 script = ExtResource("22_85sgm")
 
 [node name="SecondaryCDFX" type="Node2D" parent="Abilities/Secondary"]
@@ -275,7 +290,7 @@ player_input = NodePath("../../PlayerInput")
 type = 2
 cooldown = 1.0
 
-[node name="TeleportAbility" type="Node" parent="Abilities/Utility" node_paths=PackedStringArray("teleport_marker", "player", "player_input")]
+[node name="TeleportAbility" type="Node" parent="Abilities/Utility" node_paths=PackedStringArray("teleport_marker", "player", "player_input", "player_move")]
 script = ExtResource("24_bgcfl")
 teleport_marker = NodePath("../TPMarker")
 select_range = 700.0
@@ -283,6 +298,7 @@ select_duration = 1.0
 select_curve = SubResource("Curve_5d4jj")
 player = NodePath("../../..")
 player_input = NodePath("../../../PlayerInput")
+player_move = NodePath("../../../PlayerMove")
 
 [node name="TPMarker" type="Sprite2D" parent="Abilities/Utility"]
 self_modulate = Color(1, 1, 1, 0.490196)
@@ -353,4 +369,4 @@ explosiveness = 0.8
 [connection signal="died" from="Health" to="Destroy" method="destroy" unbinds=1]
 [connection signal="on_spawn" from="ProjectileManager" to="FireRotation/Muzzle/ShootFX" method="play"]
 [connection signal="cooldown_over" from="Abilities/Secondary" to="Abilities/Secondary/SecondaryCDFX" method="play"]
-[connection signal="cooldown_used" from="Abilities/Secondary/BasicAbility" to="Abilities/Secondary/BasicAbility/SpawnProjectiles/ManualDetonateSource" method="activate"]
+[connection signal="cooldown_used" from="Abilities/Secondary/BasicAbility" to="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles/SpawnProjectiles/ManualDetonateSource" method="activate"]

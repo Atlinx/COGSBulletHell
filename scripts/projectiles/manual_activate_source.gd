@@ -15,7 +15,8 @@ signal activated
 
 
 func _construct_projectile(projectile_data: Dictionary):
-	projectile_data.manual_activate_source = get_path()
+	if is_multiplayer_authority():
+		projectile_data.manual_activate_source = get_path()
 
 
 ## Activates any ManualActivateListeners connected to this node

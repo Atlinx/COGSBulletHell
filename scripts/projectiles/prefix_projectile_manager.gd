@@ -10,8 +10,3 @@ extends Node
 
 func _ready():
 	projectile_manager.prefix = base_node.name + prefix
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass

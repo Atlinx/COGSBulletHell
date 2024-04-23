@@ -44,6 +44,7 @@ var is_moving: bool :
 
 var network_manager: NetworkManager
 var game_manager: GameManager
+var manual_player: ManualPlayer
 
 var _interpolate_timer: float = -1
 var _interpolate_duration: float
@@ -66,6 +67,7 @@ var _is_direction_inputted: bool
 func _ready():
 	network_manager = NetworkManager.instance
 	game_manager = GameManager.instance
+	manual_player = player.get_node_or_null("ManualPlayer")
 	game_manager.game_ticked.connect(_on_game_ticked)
 	server_position = player.global_position
 	set_physics_process(player.is_controlling_player)
@@ -146,7 +148,7 @@ func _process(delta):
 			_start_interpolate_to_server_pos()
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	# Run if we are client controlling this player
 	# Don't run when we're being tweened, because that
 	# means we're getting our position corrected
@@ -192,6 +194,9 @@ func _physics_process(delta):
 @rpc("any_peer", "call_remote", "reliable")
 func _sync_to_server(source_position: Vector2):
 	var motion = source_position - player.global_position
+	if manual_player:
+		var limit = network_manager.acceptable_position_diff(manual_player.multiplayer_id, speed)
+		motion = motion.limit_length(limit)
 	var orig_visual_position = visuals_container.global_position
 	var collision = player.move_and_collide(motion)
 	var slide_count = 0

@@ -254,6 +254,7 @@ info_label = NodePath("MarginContainer/VBoxContainer/InfoLabel")
 disconnect_button = NodePath("MarginContainer/VBoxContainer/DisconnectButton")
 scoreboard_entry_prefab = ExtResource("8_y3w7w")
 scoreboard = NodePath("MarginContainer2/VBoxContainer/ScoreboardContainer")
+show_host_debug = true
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 0

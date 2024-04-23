@@ -21,6 +21,9 @@ class GamePlayer extends RefCounted:
 		set(value):
 			score = value
 			score_updated.emit(score)
+	var multiplayer_id: int :
+		get:
+			return network_player.multiplayer_id
 	
 	func _init(_network_player: NetworkManager.NetworkPlayer, _network_player_index: int, _palette: ColorPalette):
 		network_player = _network_player
@@ -46,6 +49,11 @@ var game_players_list: Array[GamePlayer] :
 		var list: Array[GamePlayer] = []
 		list.assign(game_players.values())
 		return list
+var game_players_sorted_list: Array[GamePlayer] :
+	get:
+		var _game_players_list = game_players_list
+		_game_players_list.sort_custom(func (a: GamePlayer, b: GamePlayer): return a.multiplayer_id < b.multiplayer_id)
+		return _game_players_list
 var my_player: Player
 var is_in_game: bool
 

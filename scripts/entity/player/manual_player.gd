@@ -15,6 +15,9 @@ const MAX_CAMERA_ZOOM: float = 2
 @export var camera: Camera2D
 @export var username_label: Label
 @export var player_ui: Control
+var multiplayer_id: int :
+	get:
+		return game_player.multiplayer_id
 
 var player: Player
 var game_player: GameManager.GamePlayer

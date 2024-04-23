@@ -8,6 +8,7 @@ extends Control
 @export var disconnect_button: Button
 @export var scoreboard_entry_prefab: PackedScene
 @export var scoreboard: Control
+@export var show_host_debug: bool
 
 
 func _ready():
@@ -29,7 +30,7 @@ func _on_reseted():
 func _on_game_started():
 	visible = true
 	_update_info_label()
-	for player in game_manager.game_players_list:
+	for player in game_manager.game_players_sorted_list:
 		var scoreboard_entry_inst = scoreboard_entry_prefab.instantiate() as ScoreboardEntry
 		scoreboard.add_child(scoreboard_entry_inst)
 		scoreboard_entry_inst.construct(player)
@@ -45,8 +46,12 @@ func _update_info_label():
 	info_label.text += "Latency: %.4f ms\n" % network_manager.average_latency_ms
 	info_label.text += "RTT: %.4f ms\n" % network_manager.average_rtt_ms
 	info_label.text += "Time Offset: %.4f ms\n" % network_manager.server_time_offset_ms
+	if show_host_debug and multiplayer.is_server():
+		info_label.text += "Client RTTs:\n"
+		for network_player in network_manager.network_players_sorted_list:
+			info_label.text += "  %s: %.4f\n" % [network_player.multiplayer_id, network_player.average_rtt_ms]
 
 
-func _process(delta):
+func _process(_delta):
 	if game_manager.is_in_game:
 		_update_info_label()

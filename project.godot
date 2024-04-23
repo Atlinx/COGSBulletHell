@@ -19,6 +19,8 @@ config/icon="res://assets/art/app/icon.png"
 
 [debug]
 
+gdscript/warnings/shadowed_global_identifier=0
+gdscript/warnings/incompatible_ternary=0
 multirun/number_of_windows=2
 multirun/add_custom_args=true
 multirun/window_args=["--position 2000,40 --resolution 720x405", "--position 2800,40 --resolution 720x405", "--position 2000,440 --resolution 720x405", "--position 2800,440 --resolution 720x405", "--position 0,40 --resolution 720x405", "--position 0,440 --resolution 720x405", "--position 800,0 --resolution 720x405", "--position 800,440 --resolution 720x405"]
