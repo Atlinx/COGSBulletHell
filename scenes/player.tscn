@@ -302,7 +302,7 @@ local_data = {
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 1
-cooldown = 3.0
+cooldown = 5.0
 ability_icon = ExtResource("25_k3djh")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Secondary" node_paths=PackedStringArray("player")]
@@ -343,7 +343,7 @@ local_coords = true
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 2
-cooldown = 1.0
+cooldown = 3.0
 ability_icon = ExtResource("28_83si2")
 
 [node name="RangeAbility" type="Node" parent="Abilities/Utility" node_paths=PackedStringArray("marker", "player", "player_input", "player_move")]
@@ -407,7 +407,7 @@ repeat_oneshot = true
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 3
-cooldown = 10.0
+cooldown = 30.0
 ability_icon = ExtResource("32_8sflu")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Special" node_paths=PackedStringArray("player")]
