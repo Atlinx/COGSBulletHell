@@ -17,6 +17,7 @@ func pre_construct(_game_player: GameManager.GamePlayer, _team: String):
 	player = get_parent()
 	player.pre_construct(game_player.palette, _team)
 	player.name = "Player" + str(game_player.network_player_index)
+	player.team.entity_owner_data.player_id = _game_player.network_player.multiplayer_id
 
 
 func _enter_tree():

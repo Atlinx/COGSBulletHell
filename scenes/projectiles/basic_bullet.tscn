@@ -129,8 +129,8 @@ unparent_on_play = true
 free_after_lifetime = true
 lifetime = 2.0
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="Destroy/DeathFX"]
-self_modulate = Color(1, 0, 0, 1)
+[node name="DeathParticles" type="GPUParticles2D" parent="Destroy/DeathFX"]
+self_modulate = Color(0.984314, 0.188235, 0.188235, 1)
 rotation = 3.14159
 emitting = false
 amount = 3
@@ -157,9 +157,10 @@ autoplay = "glow"
 script = ExtResource("14_sxaxn")
 palette = ExtResource("15_s5d8d")
 
-[node name="MainPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("visuals")]
+[node name="MainPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("visuals", "self_modulate_0")]
 script = ExtResource("14_34dtq")
 visuals = [NodePath("../../Visual")]
+self_modulate_0 = [NodePath("../../Destroy/DeathFX/DeathParticles")]
 palette = ExtResource("15_s5d8d")
 
 [node name="GlowPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("self_modulate_0")]

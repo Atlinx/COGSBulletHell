@@ -8,4 +8,4 @@ extends Node
 
 
 func _ready():
-	projectile_manager.local_data["palette"] = player.palette.resource_path
+	projectile_manager.local_data.palette = player.palette.resource_path

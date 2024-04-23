@@ -12,6 +12,8 @@ extends Node
 func get_damage_info() -> DamageInfo:
 	var team = hit_detector.entity.get_node("Team") as Team
 	var attacker = null
+	var attacker_data = {}
 	if team:
 		attacker = team.entity_owner
-	return DamageInfo.new(damage, is_healing, attacker)
+		attacker_data = team.entity_owner_data
+	return DamageInfo.new(damage, is_healing, attacker, attacker_data)

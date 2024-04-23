@@ -10,4 +10,4 @@ extends Node
 func _ready():
 	var palette = projectile.data.get("palette")
 	if palette:
-		projectile_manager.local_data["palette"] = palette
+		projectile_manager.local_data.palette = palette

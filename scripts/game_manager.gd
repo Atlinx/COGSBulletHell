@@ -97,14 +97,19 @@ func _on_game_started():
 		game_players[player_id] = GamePlayer.new(network_player, network_player_index, color_palettes[network_player_index])
 	level_manager.load_level()
 	if network_manager.is_server:
-		_load_level_finished()
+		_load_level_finished(1)
 	else:
-		_load_level_finished.rpc_id(1)
+		_client_load_level_finished.rpc_id(1)
 
 
+## Notifies server that client finished loading level
 @rpc("any_peer", "call_remote", "reliable")
-func _load_level_finished():
-	get_player(multiplayer.get_remote_sender_id()).loaded_level = true
+func _client_load_level_finished():
+	_load_level_finished(multiplayer.get_remote_sender_id())
+
+
+func _load_level_finished(id: int):
+	get_player(id).loaded_level = true
 	var players_loaded_level: int = 0
 	for player in game_players_list:
 		if player.loaded_level:
@@ -143,11 +148,9 @@ func _spawn_player(player_id: int, location: int):
 
 
 func _on_player_died(killing_damage_info: DamageInfo, player: Player):
-	if killing_damage_info.attacker is Player:
-		var attacking_player = killing_damage_info.attacker as Player
-		var manual_player = attacking_player.get_node_or_null("ManualPlayer") as ManualPlayer
-		if manual_player:
-			_add_score.rpc(manual_player.game_player.network_player.multiplayer_id)
+	if "player_id" in killing_damage_info.attacker_data:
+		var killing_player_id = killing_damage_info.attacker_data.player_id as int
+		_add_score.rpc(killing_player_id)
 	var game_count = _game_count
 	var game_player = player.get_node("ManualPlayer").game_player as GamePlayer
 	if my_player == player:

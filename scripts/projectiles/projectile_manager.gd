@@ -7,6 +7,9 @@ signal on_spawn
 
 @export var prefix: String
 @export var team: Team
+## Caches the team information on ready in local_dat.
+## Should only be used if the team is not expected to change
+@export var cache_team: bool = true
 @export var prefabs: Array[PackedScene]
 # Max projectiles that can be on screen
 # After counter reaches projectiles_limit,
@@ -17,12 +20,20 @@ var network_manager: NetworkManager
 var world: World
 var counter: int
 ## Local data that is copied to spawned projectiles
+@export var _local_data: Dictionary = {}
 var local_data: Dictionary = {}
 
 
 func _ready():
+	local_data.merge(_local_data)
 	world = World.instance
 	network_manager = NetworkManager.instance
+	if cache_team and team:
+		local_data.team = team.team
+		local_data.entity_owner = team.entity_owner.get_path() if is_instance_valid(team.entity_owner) else null
+		local_data.entity_owner_data = team.entity_owner_data
+		print("local data: ", JSON.stringify(local_data, "  "))
+
 
 func spawn_projectile(prefab: PackedScene, data: Dictionary):
 	var index = prefabs.find(prefab)
@@ -36,11 +47,10 @@ func spawn_projectile(prefab: PackedScene, data: Dictionary):
 # }
 func spawn_projectile_id(index: int, data: Dictionary):
 	assert(index >= 0 and index < prefabs.size(), "Projectile index must be within prefabs array bounds")
-	if team:
-		if not "team" in data:
-			data.team = team.team
-		if not "entity_owner" in data:
-			data.entity_owner = team.entity_owner.get_path()
+	if not cache_team and team:
+		data.team = team.team
+		data.entity_owner = team.entity_owner.get_path() if is_instance_valid(team.entity_owner) else null
+		data.entity_owner_data = team.entity_owner_data
 	data.time = network_manager.server_time
 	data._prefab_index = index
 	# Spawn immediately on our side

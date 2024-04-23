@@ -1,11 +1,12 @@
-[gd_scene load_steps=15 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=16 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
-[ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/level.tscn" id="1_negoe"]
+[ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/levels/level_big.tscn" id="1_negoe"]
 [ext_resource type="Script" path="res://scripts/main_menu_ui.gd" id="1_ok3ni"]
 [ext_resource type="Script" path="res://scripts/menu_manager.gd" id="1_qh41f"]
 [ext_resource type="Script" path="res://scripts/level_manager.gd" id="1_wlfwy"]
 [ext_resource type="Script" path="res://scripts/lobby_ui.gd" id="2_6kl11"]
+[ext_resource type="PackedScene" uid="uid://clh6wi7v5ir4j" path="res://scenes/levels/level_small.tscn" id="2_ethu2"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="3_ltb6v"]
 [ext_resource type="Script" path="res://scripts/gameplay_ui.gd" id="4_lewxl"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="5_fo7ky"]
@@ -19,7 +20,7 @@
 
 [node name="LevelManager" type="Node2D" parent="." node_paths=PackedStringArray("game_manager")]
 script = ExtResource("1_wlfwy")
-level_prefab = ExtResource("1_negoe")
+level_prefab = ExtResource("2_ethu2")
 game_manager = NodePath("../GameManager")
 disable_collision_for_clients = false
 

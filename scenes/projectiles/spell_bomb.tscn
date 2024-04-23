@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://b746fpsckjvde"]
+[gd_scene load_steps=35 format=3 uid="uid://b746fpsckjvde"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/projectile.gd" id="1_0i34w"]
 [ext_resource type="Texture2D" uid="uid://bis4e0pmbpka3" path="res://assets/art/fx/spell_bomb_glow_fx.png" id="2_e48m4"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/fx.gd" id="9_2nmfu"]
 [ext_resource type="Texture2D" uid="uid://bxutbw0c56cic" path="res://assets/art/fx/96_star_fx.png" id="12_t23j3"]
 [ext_resource type="Script" path="res://scripts/entity/team.gd" id="12_wt5b4"]
+[ext_resource type="Script" path="res://scripts/entity/advanced_gpu_particles_2d.gd" id="13_3f6dt"]
 [ext_resource type="Script" path="res://scripts/projectiles/spawn_projectiles.gd" id="13_472lb"]
 [ext_resource type="Script" path="res://scripts/projectiles/palette_swap_projectile.gd" id="13_i7wjr"]
 [ext_resource type="Texture2D" uid="uid://dc236m2hrwthv" path="res://assets/art/fx/64_star_fx.png" id="13_rmgon"]
@@ -54,29 +55,431 @@ scale_min = 2.0
 scale_max = 2.0
 scale_curve = SubResource("CurveTexture_y4et6")
 
-[sub_resource type="Curve" id="Curve_lwies"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.3379, 1), 0.0, 0.0, 0, 0, Vector2(0.981735, 0), -2.84416, 0.0, 0, 0]
-point_count = 3
+[sub_resource type="Shader" id="Shader_y64ac"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.2.1.stable's ParticleProcessMaterial.
 
-[sub_resource type="CurveTexture" id="CurveTexture_62aig"]
-curve = SubResource("Curve_lwies")
+shader_type particles;
+render_mode disable_velocity;
+uniform vec3 direction;
+uniform float flatness;
+uniform float inherit_emitter_velocity_ratio = 0;
+uniform float initial_linear_velocity_min;
+uniform float initial_linear_velocity_max;
+uniform float directional_velocity_min;
+uniform float directional_velocity_max;
+uniform float angular_velocity_min;
+uniform float angular_velocity_max;
+uniform float orbit_velocity_min;
+uniform float orbit_velocity_max;
+uniform float radial_velocity_min;
+uniform float radial_velocity_max;
+uniform float linear_accel_min;
+uniform float linear_accel_max;
+uniform float radial_accel_min;
+uniform float radial_accel_max;
+uniform float tangent_accel_min;
+uniform float tangent_accel_max;
+uniform float damping_min;
+uniform float damping_max;
+uniform float initial_angle_min;
+uniform float initial_angle_max;
+uniform float scale_min;
+uniform float scale_max;
+uniform float hue_variation_min;
+uniform float hue_variation_max;
+uniform float anim_speed_min;
+uniform float anim_speed_max;
+uniform float anim_offset_min;
+uniform float anim_offset_max;
+uniform float lifetime_randomness;
+uniform vec3 emission_shape_offset = vec3(0.);
+uniform vec3 emission_shape_scale = vec3(1.);
+uniform vec3 velocity_pivot = vec3(0.);
+uniform vec4 color_value : source_color;
+uniform vec3 gravity;
+uniform sampler2D scale_curve : repeat_disable;
+vec4 rotate_hue(vec4 current_color, float hue_rot_angle){
+	float hue_rot_c = cos(hue_rot_angle);
+	float hue_rot_s = sin(hue_rot_angle);
+	mat4 hue_rot_mat = mat4(vec4(0.299, 0.587, 0.114, 0.0),
+			vec4(0.299, 0.587, 0.114, 0.0),
+			vec4(0.299, 0.587, 0.114, 0.0),
+			vec4(0.000, 0.000, 0.000, 1.0)) +
+		mat4(vec4(0.701, -0.587, -0.114, 0.0),
+			vec4(-0.299, 0.413, -0.114, 0.0),
+			vec4(-0.300, -0.588, 0.886, 0.0),
+			vec4(0.000, 0.000, 0.000, 0.0)) * hue_rot_c +
+		mat4(vec4(0.168, 0.330, -0.497, 0.0),
+			vec4(-0.328, 0.035,  0.292, 0.0),
+			vec4(1.250, -1.050, -0.203, 0.0),
+			vec4(0.000, 0.000, 0.000, 0.0)) * hue_rot_s;
+	return hue_rot_mat * current_color;
+}
+uniform int particle_amount;
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_a4vyk"]
-lifetime_randomness = 0.4
-particle_flag_disable_z = true
-emission_shape = 6
-emission_ring_axis = Vector3(0, 0, 1)
-emission_ring_height = 1.0
-emission_ring_radius = 1.0
-emission_ring_inner_radius = 0.0
-spread = 180.0
-initial_velocity_min = 200.0
-initial_velocity_max = 250.0
-gravity = Vector3(0, 0, 0)
-damping_min = 100.0
-damping_max = 100.0
-scale_max = 1.5
-scale_curve = SubResource("CurveTexture_62aig")
+
+float rand_from_seed(inout uint seed) {
+	int k;
+	int s = int(seed);
+	if (s == 0)
+	s = 305420679;
+	k = s / 127773;
+	s = 16807 * (s - k * 127773) - 2836 * k;
+	if (s < 0)
+		s += 2147483647;
+	seed = uint(s);
+	return float(seed % uint(65536)) / 65535.0;
+}
+
+float rand_from_seed_m1_p1(inout uint seed) {
+	return rand_from_seed(seed) * 2.0 - 1.0;
+}
+
+uint hash(uint x) {
+	x = ((x >> uint(16)) ^ x) * uint(73244475);
+	x = ((x >> uint(16)) ^ x) * uint(73244475);
+	x = (x >> uint(16)) ^ x;
+	return x;
+}
+
+struct DisplayParameters{
+	vec3 scale;
+	float hue_rotation;
+	float animation_speed;
+	float animation_offset;
+	float lifetime;
+	vec4 color;
+};
+
+struct DynamicsParameters{
+	float angle;
+	float angular_velocity;
+	float initial_velocity_multiplier;
+	float directional_velocity;
+	float radial_velocity;
+	float orbit_velocity;
+};
+struct PhysicalParameters{
+	float linear_accel;
+	float radial_accel;
+	float tangent_accel;
+	float damping;
+};
+
+void calculate_initial_physical_params(inout PhysicalParameters params, inout uint alt_seed){
+	params.linear_accel = mix(linear_accel_min, linear_accel_max, rand_from_seed(alt_seed));
+	params.radial_accel = mix(radial_accel_min, radial_accel_max, rand_from_seed(alt_seed));
+	params.tangent_accel = mix(tangent_accel_min, tangent_accel_max, rand_from_seed(alt_seed));
+	params.damping = mix(damping_min, damping_max, rand_from_seed(alt_seed));
+}
+
+void calculate_initial_dynamics_params(inout DynamicsParameters params,inout uint alt_seed){
+	// -------------------- DO NOT REORDER OPERATIONS, IT BREAKS VISUAL COMPATIBILITY
+	// -------------------- ADD NEW OPERATIONS AT THE BOTTOM
+	params.angle = mix(initial_angle_min, initial_angle_max, rand_from_seed(alt_seed));
+	params.angular_velocity = mix(angular_velocity_min, angular_velocity_max, rand_from_seed(alt_seed));
+	params.initial_velocity_multiplier = mix(initial_linear_velocity_min, initial_linear_velocity_max,rand_from_seed(alt_seed));
+	params.directional_velocity = mix(directional_velocity_min, directional_velocity_max,rand_from_seed(alt_seed));
+	params.radial_velocity = mix(radial_velocity_min, radial_velocity_max,rand_from_seed(alt_seed));
+	params.orbit_velocity = mix(orbit_velocity_min, orbit_velocity_max,rand_from_seed(alt_seed));
+}
+void calculate_initial_display_params(inout DisplayParameters params,inout uint alt_seed){
+	// -------------------- DO NOT REORDER OPERATIONS, IT BREAKS VISUAL COMPATIBILITY
+	// -------------------- ADD NEW OPERATIONS AT THE BOTTOM
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+   params.scale = vec3(mix(scale_min, scale_max, rand_from_seed(alt_seed)));
+   params.scale = sign(params.scale) * max(abs(params.scale), 0.001);
+	params.hue_rotation =  pi * 2.0 * mix(hue_variation_min, hue_variation_max, rand_from_seed(alt_seed));
+	params.animation_speed = mix(anim_speed_min, anim_speed_max, rand_from_seed(alt_seed));
+	params.animation_offset = mix(anim_offset_min, anim_offset_max, rand_from_seed(alt_seed));
+	params.lifetime = (1.0 - lifetime_randomness * rand_from_seed(alt_seed));
+	params.color = color_value;
+}
+void process_display_param(inout DisplayParameters parameters, float lifetime){
+	// compile-time add textures
+	parameters.scale *= texture(scale_curve, vec2(lifetime)).rgb;
+	parameters.color = rotate_hue(parameters.color, parameters.hue_rotation);
+}
+vec3 calculate_initial_position(inout uint alt_seed) {
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+	vec3 pos = vec3(0.);
+	 pos = vec3(0.);
+	return pos * emission_shape_scale + emission_shape_offset;
+}
+
+vec3 process_orbit_displacement(DynamicsParameters param, float lifetime, inout uint alt_seed, mat4 transform, mat4 emission_transform,float delta, float total_lifetime){
+if(abs(param.orbit_velocity) < 0.01 || delta < 0.001){ return vec3(0.0);}
+
+	vec3 displacement = vec3(0.);
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+	float orbit_amount = param.orbit_velocity;
+	if (orbit_amount != 0.0) {
+       vec3 pos = transform[3].xyz;
+       vec3 org = emission_transform[3].xyz;
+       vec3 diff = pos - org;
+	     float ang = orbit_amount * pi * 2.0 * delta;
+	     mat2 rot = mat2(vec2(cos(ang), -sin(ang)), vec2(sin(ang), cos(ang)));
+	     displacement.xy -= diff.xy;
+        displacement.xy += rot * diff.xy;
+	}
+       return (emission_transform * vec4(displacement/delta, 0.0)).xyz;
+}
+
+
+vec3 get_random_direction_from_spread(inout uint alt_seed, float spread_angle){
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+	vec3 velocity = vec3(0.);
+	float spread_rad = spread_angle * degree_to_rad;
+	float angle1_rad = rand_from_seed_m1_p1(alt_seed) * spread_rad;
+	float angle2_rad = rand_from_seed_m1_p1(alt_seed) * spread_rad * (1.0 - flatness);
+	vec3 direction_xz = vec3(sin(angle1_rad), 0.0, cos(angle1_rad));
+	vec3 direction_yz = vec3(0.0, sin(angle2_rad), cos(angle2_rad));
+	direction_yz.z = direction_yz.z / max(0.0001,sqrt(abs(direction_yz.z))); // better uniform distribution
+	vec3 spread_direction = vec3(direction_xz.x * direction_yz.z, direction_yz.y, direction_xz.z * direction_yz.z);
+	vec3 direction_nrm = length(direction) > 0.0 ? normalize(direction) : vec3(0.0, 0.0, 1.0);
+	// rotate spread to direction
+	vec3 binormal = cross(vec3(0.0, 1.0, 0.0), direction_nrm);
+	if (length(binormal) < 0.0001) {
+		// direction is parallel to Y. Choose Z as the binormal.
+		binormal = vec3(0.0, 0.0, 1.0);
+	}
+	binormal = normalize(binormal);
+	vec3 normal = cross(binormal, direction_nrm);
+	spread_direction = binormal * spread_direction.x + normal * spread_direction.y + direction_nrm * spread_direction.z;
+	return spread_direction;
+}
+vec3 process_radial_displacement(DynamicsParameters param, float lifetime, inout uint alt_seed, mat4 transform, mat4 emission_transform, float delta){
+	vec3 radial_displacement = vec3(0.0);
+	if (delta < 0.001){
+		return radial_displacement;
+	}
+	float radial_displacement_multiplier = 1.0;
+	vec3 global_pivot = (emission_transform * vec4(velocity_pivot, 1.0)).xyz;
+	if(length(transform[3].xyz - global_pivot) > 0.01){
+		radial_displacement = normalize(transform[3].xyz - global_pivot) * radial_displacement_multiplier * param.radial_velocity;
+	}else{radial_displacement = get_random_direction_from_spread(alt_seed, 360.0)* param.radial_velocity;} 
+	if (radial_displacement_multiplier * param.radial_velocity < 0.0){
+ // Prevent inwards velocity to flicker once the point is reached.		if (length(radial_displacement) > 0.01){
+		radial_displacement = normalize(radial_displacement) * min(abs((radial_displacement_multiplier * param.radial_velocity)), length(transform[3].xyz - global_pivot) / delta);
+		}
+	
+	return radial_displacement;
+}
+
+void process_physical_parameters(inout PhysicalParameters params, float lifetime_percent){
+	
+}
+
+void start() {
+	uint base_number = NUMBER;
+	uint alt_seed = hash(base_number + uint(1) + RANDOM_SEED);
+	DisplayParameters params;
+	calculate_initial_display_params(params, alt_seed);
+	// reset alt seed?
+	// alt_seed = hash(base_number + uint(1) + RANDOM_SEED);
+	DynamicsParameters dynamic_params;
+	calculate_initial_dynamics_params(dynamic_params, alt_seed);
+	PhysicalParameters physics_params;
+	calculate_initial_physical_params(physics_params, alt_seed);
+   process_display_param(params, 0.0);
+	if (rand_from_seed(alt_seed) > AMOUNT_RATIO) {
+		ACTIVE = false;
+	}
+	
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+	
+	if (RESTART_CUSTOM){
+		CUSTOM = vec4(0.);
+		CUSTOM.w = params.lifetime;
+		CUSTOM.x = dynamic_params.angle;
+	}
+	if (RESTART_COLOR){
+		COLOR = params.color;
+	}
+	if (RESTART_ROT_SCALE) {
+		TRANSFORM[0].xyz = vec3(1.0, 0.0, 0.0);
+		TRANSFORM[1].xyz = vec3(0.0, 1.0, 0.0);
+		TRANSFORM[2].xyz = vec3(0.0, 0.0, 1.0);
+	}
+
+	if (RESTART_POSITION) {
+		TRANSFORM[3].xyz = calculate_initial_position(alt_seed);
+		TRANSFORM = EMISSION_TRANSFORM * TRANSFORM;
+		}
+	if (RESTART_VELOCITY) {
+		float angle_per_particle = 360.0 / float(particle_amount);
+	    float angle1_rad = float(INDEX) * angle_per_particle * PI / 180.0;
+	    vec3 rot = vec3(cos(angle1_rad), sin(angle1_rad), 0.0);
+	    VELOCITY = rot * dynamic_params.initial_velocity_multiplier;
+		}
+	process_display_param(params, 0.);
+//	process_dynamic_parameters(dynamic_params, 0., alt_seed, TRANSFORM, EMISSION_TRANSFORM, DELTA);
+	VELOCITY = (EMISSION_TRANSFORM * vec4(VELOCITY, 0.0)).xyz;
+	VELOCITY += EMITTER_VELOCITY * inherit_emitter_velocity_ratio;
+		VELOCITY.z = 0.;
+		TRANSFORM[3].z = 0.;
+}
+
+void process() {
+	uint base_number = NUMBER;
+//	if (repeatable){
+//		base_number = INDEX;
+//	}
+	uint alt_seed = hash(base_number + uint(1) + RANDOM_SEED);
+	DisplayParameters params;
+	calculate_initial_display_params(params, alt_seed);
+	DynamicsParameters dynamic_params;
+	calculate_initial_dynamics_params(dynamic_params, alt_seed);
+	PhysicalParameters physics_params;
+	calculate_initial_physical_params(physics_params, alt_seed);
+	float pi = 3.14159;
+	float degree_to_rad = pi / 180.0;
+
+	CUSTOM.y += DELTA / LIFETIME;
+	CUSTOM.y = mix(CUSTOM.y, 1.0, INTERPOLATE_TO_END);
+	float lifetime_percent = CUSTOM.y/ params.lifetime;
+	if (CUSTOM.y > CUSTOM.w) {
+		ACTIVE = false;
+	}
+	
+	
+	
+	// will use this later to calculate final displacement and orient the particle.
+	vec3 starting_position = TRANSFORM[3].xyz;
+	vec3 controlled_displacement = vec3(0.0);
+	
+//	VELOCITY += process_physics_parameters(dynamic_params, lifetime_percent, alt_seed, TRANSFORM, EMISSION_TRANSFORM, DELTA);
+	
+	controlled_displacement += process_orbit_displacement(dynamic_params, lifetime_percent, alt_seed, TRANSFORM, EMISSION_TRANSFORM, DELTA, params.lifetime * LIFETIME);
+	// calculate all velocity
+	
+	controlled_displacement += process_radial_displacement(dynamic_params, lifetime_percent, alt_seed, TRANSFORM, EMISSION_TRANSFORM, DELTA);
+	
+	
+	process_physical_parameters(physics_params, lifetime_percent);
+	vec3 force;
+	{
+		// copied from previous version
+		vec3 pos = TRANSFORM[3].xyz;
+		force = gravity;
+		// apply linear acceleration
+		force += length(VELOCITY) > 0.0 ? normalize(VELOCITY) * physics_params.linear_accel : vec3(0.0);
+		// apply radial acceleration
+		vec3 org = EMISSION_TRANSFORM[3].xyz;
+		vec3 diff = pos - org;
+		force += length(diff) > 0.0 ? normalize(diff) * physics_params.radial_accel : vec3(0.0);
+		// apply tangential acceleration;
+		float tangent_accel_val = physics_params.tangent_accel;
+       force += length(diff.yx) > 0.0 ? vec3(normalize(diff.yx * vec2(-1.0, 1.0)), 0.0) * tangent_accel_val : vec3(0.0);
+		force += ATTRACTOR_FORCE;
+
+		// apply attractor forces
+			force.z = 0.;
+		VELOCITY += force * DELTA;
+	}
+	{
+		// copied from previous version
+		if (physics_params.damping > 0.0) {
+			float v = length(VELOCITY);
+			v -= physics_params.damping * DELTA;
+			if (v < 0.0) {
+				VELOCITY = vec3(0.0);
+			} else {
+				VELOCITY = normalize(VELOCITY) * v;
+			}
+		}
+		
+	}
+	
+	
+	// turbulence before limiting
+	vec3 final_velocity = controlled_displacement + VELOCITY;
+	
+	// limit velocity
+	
+		final_velocity.z = 0.;
+	TRANSFORM[3].xyz += final_velocity * DELTA;
+	
+	
+	process_display_param(params, lifetime_percent);
+	
+	float base_angle = dynamic_params.angle;
+	base_angle += CUSTOM.y * LIFETIME * dynamic_params.angular_velocity;
+	CUSTOM.x = base_angle * degree_to_rad;
+   COLOR = params.color;
+	TRANSFORM[0] = vec4(cos(CUSTOM.x), -sin(CUSTOM.x), 0.0, 0.0);
+	TRANSFORM[1] = vec4(sin(CUSTOM.x), cos(CUSTOM.x), 0.0, 0.0);
+	TRANSFORM[2] = vec4(0.0, 0.0, 1.0, 0.0);
+	TRANSFORM[3].z = 0.0;
+//	params.scale *= length(final_velocity)/100.0;
+
+	TRANSFORM[0].xyz *= sign(params.scale.x) * max(abs(params.scale.x), 0.001);
+	TRANSFORM[1].xyz *= sign(params.scale.y) * max(abs(params.scale.y), 0.001);
+	TRANSFORM[2].xyz *= sign(params.scale.z) * max(abs(params.scale.z), 0.001);
+	
+	// 
+	CUSTOM.z = params.animation_offset + lifetime_percent * params.animation_speed;
+	
+	if (CUSTOM.y > CUSTOM.w) {
+		ACTIVE = false;
+	}
+}
+
+"
+
+[sub_resource type="Curve" id="Curve_b3p2x"]
+_data = [Vector2(0.727273, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -5.58462, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_t65i0"]
+curve = SubResource("Curve_b3p2x")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cprdb"]
+shader = SubResource("Shader_y64ac")
+shader_parameter/direction = Vector3(1, 0, 0)
+shader_parameter/flatness = 0.0
+shader_parameter/inherit_emitter_velocity_ratio = 0.0
+shader_parameter/initial_linear_velocity_min = 300.0
+shader_parameter/initial_linear_velocity_max = 300.0
+shader_parameter/directional_velocity_min = 1.0
+shader_parameter/directional_velocity_max = 1.0
+shader_parameter/angular_velocity_min = 0.0
+shader_parameter/angular_velocity_max = 0.0
+shader_parameter/orbit_velocity_min = 0.0
+shader_parameter/orbit_velocity_max = 0.0
+shader_parameter/radial_velocity_min = 0.0
+shader_parameter/radial_velocity_max = 0.0
+shader_parameter/linear_accel_min = 0.0
+shader_parameter/linear_accel_max = 0.0
+shader_parameter/radial_accel_min = 0.0
+shader_parameter/radial_accel_max = 0.0
+shader_parameter/tangent_accel_min = 0.0
+shader_parameter/tangent_accel_max = 0.0
+shader_parameter/damping_min = 600.0
+shader_parameter/damping_max = 600.0
+shader_parameter/initial_angle_min = 0.0
+shader_parameter/initial_angle_max = 0.0
+shader_parameter/scale_min = 1.0
+shader_parameter/scale_max = 1.0
+shader_parameter/hue_variation_min = 0.0
+shader_parameter/hue_variation_max = 0.0
+shader_parameter/anim_speed_min = 0.0
+shader_parameter/anim_speed_max = 0.0
+shader_parameter/anim_offset_min = 0.0
+shader_parameter/anim_offset_max = 0.0
+shader_parameter/lifetime_randomness = 0.0
+shader_parameter/emission_shape_offset = Vector3(0, 0, 0)
+shader_parameter/emission_shape_scale = Vector3(1, 1, 1)
+shader_parameter/velocity_pivot = Vector3(0, 0, 0)
+shader_parameter/color_value = Color(1, 1, 1, 1)
+shader_parameter/gravity = Vector3(0, -1e-06, 0)
+shader_parameter/particle_amount = 8
+shader_parameter/scale_curve = SubResource("CurveTexture_t65i0")
 
 [sub_resource type="Animation" id="Animation_1jx3a"]
 length = 0.001
@@ -143,14 +546,15 @@ damage = 20
 
 [node name="ForwardProjectileMove" type="Node" parent="."]
 script = ExtResource("7_swrpo")
-speed = 600.0
+speed = 800.0
 
 [node name="Destroy" type="Node2D" parent="."]
 script = ExtResource("8_lvhby")
 lifetime = 3.0
 
-[node name="SpellFX" type="Node2D" parent="Destroy"]
+[node name="SpellFX" type="Node2D" parent="Destroy" node_paths=PackedStringArray("prefix_name_source")]
 script = ExtResource("9_2nmfu")
+prefix_name_source = NodePath("../..")
 unparent_on_play = true
 free_after_lifetime = true
 lifetime = 1.0
@@ -168,41 +572,64 @@ explosiveness = 0.9
 
 [node name="SpellPostFX" type="Node2D" parent="Destroy/SpellFX"]
 script = ExtResource("9_2nmfu")
-lifetime = 1.0
+lifetime = 4.0
 
-[node name="SpellPostParticles" type="GPUParticles2D" parent="Destroy/SpellFX/SpellPostFX"]
+[node name="Container" type="Node2D" parent="Destroy/SpellFX/SpellPostFX"]
+
+[node name="SpellBlastFX" type="Node2D" parent="Destroy/SpellFX/SpellPostFX/Container"]
+script = ExtResource("9_2nmfu")
+lifetime = 1.0
+synced = true
+
+[node name="SpellBlastParticles" type="GPUParticles2D" parent="Destroy/SpellFX/SpellPostFX/Container/SpellBlastFX"]
 self_modulate = Color(0.984314, 0.188235, 0.188235, 1)
 emitting = false
-process_material = SubResource("ParticleProcessMaterial_a4vyk")
+process_material = SubResource("ShaderMaterial_cprdb")
 texture = ExtResource("13_rmgon")
 lifetime = 0.5
 one_shot = true
 explosiveness = 0.9
+script = ExtResource("13_3f6dt")
+repeat_oneshot = true
 
-[node name="SpawnProjectiles" type="Node" parent="Destroy" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+[node name="SpawnProjectiles" type="Node" parent="Destroy/SpellFX/SpellPostFX" node_paths=PackedStringArray("projectile_manager", "muzzle")]
 script = ExtResource("13_472lb")
 projectile_manager = NodePath("ProjectileManager")
-muzzle = NodePath("..")
+muzzle = NodePath("../..")
 muzzle_offset = 64.0
-amount = 5
+amount = 8
 is_radial = true
+rounds = 4
+round_interval = 0.35
+round_angle_offset = 45.0
+local_data = {
+"speed": 400.0
+}
 
-[node name="ProjectileManager" type="Node" parent="Destroy/SpawnProjectiles" node_paths=PackedStringArray("team")]
+[node name="ProjectileManager" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles" node_paths=PackedStringArray("team")]
 script = ExtResource("14_mdc6w")
-team = NodePath("../../../Team")
+team = NodePath("ProjManagerTeam")
 prefabs = Array[PackedScene]([ExtResource("15_g88rs")])
 
-[node name="PrefixProjectileManager" type="Node" parent="Destroy/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("base_node")]
+[node name="PrefixProjectileManager" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("base_node")]
 script = ExtResource("15_bl6v6")
-base_node = NodePath("../../../..")
+base_node = NodePath("../../../../../..")
 prefix = "Spell"
 
-[node name="RecolorProjectileManager" type="Node" parent="Destroy/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("projectile")]
+[node name="RecolorProjectileManager" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("projectile")]
 script = ExtResource("15_on2i2")
-projectile = NodePath("../../../..")
+projectile = NodePath("../../../../../..")
+
+[node name="ProjManagerTeam" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("source_team")]
+script = ExtResource("12_wt5b4")
+entity_owner_type = null
+_entity_owner_data = null
+source_team = NodePath("../../../../../../Team")
 
 [node name="Team" type="Node" parent="."]
 script = ExtResource("12_wt5b4")
+entity_owner_type = null
+_entity_owner_data = null
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -217,7 +644,7 @@ palette = ExtResource("16_ywxfi")
 [node name="MainPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("visuals", "self_modulate_0")]
 script = ExtResource("14_ipbfj")
 visuals = [NodePath("../../Visual")]
-self_modulate_0 = [NodePath("../../Destroy/SpellFX/SpellParticles"), NodePath("../../Destroy/SpellFX/SpellPostFX/SpellPostParticles")]
+self_modulate_0 = [NodePath("../../Destroy/SpellFX/SpellParticles"), NodePath("../../Destroy/SpellFX/SpellPostFX/Container/SpellBlastFX/SpellBlastParticles")]
 palette = ExtResource("16_ywxfi")
 
 [node name="GlowPaletteSwap" type="Node" parent="PaletteSwapProjectile" node_paths=PackedStringArray("self_modulate_0")]
@@ -228,3 +655,4 @@ palette = ExtResource("16_ywxfi")
 
 [connection signal="detector_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
 [connection signal="wall_entered" from="HitBox" to="Destroy" method="destroy" unbinds=1]
+[connection signal="round_spawned" from="Destroy/SpellFX/SpellPostFX/SpawnProjectiles" to="Destroy/SpellFX/SpellPostFX/Container/SpellBlastFX" method="play"]

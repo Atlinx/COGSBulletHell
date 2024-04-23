@@ -134,7 +134,7 @@ var network_players_sorted_list: Array[NetworkPlayer]:
 		return _network_players_list
 var my_network_player: NetworkPlayer:
 	get:
-		return network_players[multiplayer.get_unique_id()]
+		return network_players.get(multiplayer.get_unique_id())
 
 
 func _enter_tree():
@@ -226,7 +226,7 @@ func client_to_server_time(client_time_ms: float):
 
 
 func reset_game():
-	if peer and peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+	if peer and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
 		peer.close()
 	peer = null
 	network_players.clear()
@@ -278,7 +278,6 @@ func _on_connection_to_server_approved(_network_players: Array):
 	my_network_player.readied_up = false
 	my_network_player.username = "Player" + str(multiplayer.get_unique_id())
 	network_players[my_network_player.multiplayer_id] = my_network_player
-	print("connection approved: network_players: ", network_players)
 	update_my_network_player()
 	connected_to_server.emit()
 

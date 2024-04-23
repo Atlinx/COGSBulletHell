@@ -4,6 +4,7 @@ extends Node
 
 
 signal projectiles_spawned
+signal round_spawned
 
 
 @export var projectile_manager: ProjectileManager
@@ -21,28 +22,35 @@ signal projectiles_spawned
 			notify_property_list_changed()
 @export var arc: float
 @export var angle_offset: float = 0
+@export var rounds: int = 1
+@export var round_interval: float = 1
+@export var round_angle_offset: float = 0
+@export var local_data: Dictionary
 
 
 func spawn(_prefab_index: int = prefab_index):
 	var angle_per_bullet: float
 	if is_radial:
-		angle_per_bullet = 360 / (amount + 1)
+		angle_per_bullet = TAU / (amount + 1)
 	else:
 		angle_per_bullet = arc / amount
-	print("shoot amount: ", amount)
-	for i in range(amount):
-		print("  shooting: ", i)
-		var angle: float
-		if is_radial:
-			angle = angle_per_bullet * i + angle_offset
-		else:
-			angle = angle_per_bullet * i - arc / 2 + angle_offset
-		var direction = Vector2.from_angle(muzzle.global_rotation + angle)
-		projectile_manager.spawn_projectile_id(_prefab_index, {
-			"position": muzzle.global_position + direction * muzzle_offset,
-			"direction": direction
-		})
-		projectiles_spawned.emit()
+	for r in range(rounds):
+		for i in range(amount):
+			var angle: float
+			if is_radial:
+				angle = angle_per_bullet * i + angle_offset + r * round_angle_offset
+			else:
+				angle = angle_per_bullet * i - arc / 2 + angle_offset
+			var direction = Vector2.from_angle(muzzle.global_rotation + angle)
+			var data = {
+				"position": muzzle.global_position + direction * muzzle_offset,
+				"direction": direction
+			}
+			data.merge(local_data)
+			projectile_manager.spawn_projectile_id(_prefab_index, data)
+		round_spawned.emit()
+		await get_tree().create_timer(round_interval).timeout
+	projectiles_spawned.emit()
 
 
 func _validate_property(property):

@@ -6,6 +6,7 @@ extends Node2D
 signal finished
 
 
+@export var prefix_name_source: Node
 @export var unparent_on_play: bool
 @export var free_after_lifetime: bool
 @export var start_delay: float
@@ -38,6 +39,8 @@ func _ready():
 		return
 	if play_on_ready:
 		play()
+	if prefix_name_source:
+		name = prefix_name_source.name + name
 
 
 func play():
@@ -79,6 +82,9 @@ func _process(delta):
 				elif child is AnimationPlayer:
 					child.play(default_animation_name)
 					child.seek(_preprocess_tracker, true)
+				elif child is SpawnProjectiles:
+					if is_multiplayer_authority():
+						child.spawn()
 			_lifetime_timer = maxf(lifetime - _preprocess_tracker, 0)
 			_preprocess_tracker = maxf(_preprocess_tracker - lifetime, 0)
 	if _lifetime_timer >= 0:
