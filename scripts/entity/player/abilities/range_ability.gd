@@ -58,7 +58,6 @@ func _on_used_released():
 	if multiplayer.is_server():
 		_use_server(network_manager.server_time, data)
 	else:
-		print("req use server")
 		_use_server.rpc_id(1, network_manager.server_time, data)
 		ability.start_cooldown()
 		used.emit()
@@ -76,7 +75,6 @@ func _process(delta):
 
 @rpc("any_peer", "call_remote", "reliable")
 func _use_server(start_time: float, data: Dictionary):
-	print("use server")
 	var diff = network_manager.server_time - start_time
 	if manual_player:
 		# Perform verification
