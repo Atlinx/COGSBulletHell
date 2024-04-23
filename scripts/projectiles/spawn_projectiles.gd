@@ -34,6 +34,42 @@ signal round_spawned
 @export var round_angle_offset: float = 0
 @export var local_data: Dictionary
 
+var network_manager: NetworkManager
+
+
+func _ready():
+	network_manager = NetworkManager.instance
+
+
+# Used for spawning projectiles in abilities
+func _send_ability_data(data: Dictionary):
+	data.muzzle_position = muzzle.global_position
+	data.muzzle_rotation = muzzle.global_rotation
+
+
+# Used for spawning projectiles in abilities
+func _receive_ability_data(data: Dictionary):
+	# TODO NOW: Calculate network latency of server to each individual client
+	#
+	# Calcuating latency on server using pings to clients should be safe.
+	# - Use an packet acknowledgement system
+	# - Every ping packet has an ID, and we receive acknowledgements back from client
+	# - If ping packet remains unacknowledged for a long time (10s), we kick the client
+	# - If ping packet is acknowledge out of order, we kick the client
+	#   - This is b/c we know we're using TCP which should be reliable
+	#   - Any out of order acknowledgement must mean tampering with the ping code. 
+	# - We calculate latency as (ping packet receive time - ping packet sent time) (all on server side)
+	#
+	# Then we can use this latency within this check and other checks like this to verify
+	# that the data we're receiving from clients is within acceptable bounds.
+	#
+	# We can then create a max server movement factor on PlayerMove that's dependent our latency to
+	# a client. This would limit arbitrary movement (speed hacks) for clients on the server.
+	if (data.muzzle_position as Vector2).distance_squared_to(muzzle.global_position) < max(3 * network_manager.average_latency_ms, 32):
+		return
+	muzzle.global_position = data.muzzle_position
+	muzzle.global_rotation = data.muzzle_rotation
+
 
 func spawn(_prefab_index: int = prefab_index):
 	var angle_per_bullet: float

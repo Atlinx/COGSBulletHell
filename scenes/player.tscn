@@ -24,8 +24,8 @@
 [ext_resource type="Script" path="res://scripts/entity/player/inputs/player_input.gd" id="17_tqdpq"]
 [ext_resource type="Script" path="res://scripts/projectiles/prefix_projectile_manager.gd" id="17_wq0de"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_ability.gd" id="18_3pbvy"]
+[ext_resource type="Script" path="res://scripts/entity/player/player_recolor_projectile_manager.gd" id="18_lfneg"]
 [ext_resource type="Script" path="res://scripts/entity/palette_swap.gd" id="18_lmg5v"]
-[ext_resource type="Script" path="res://scripts/entity/player/player_projectile_manager_configurer.gd" id="19_23ovg"]
 [ext_resource type="Script" path="res://scripts/entity/player/abilities/basic_ability.gd" id="20_fr7uk"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_animation_player.gd" id="20_qpu25"]
 [ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="21_l70jj"]
@@ -209,8 +209,9 @@ script = ExtResource("17_wq0de")
 base_node = NodePath("../..")
 prefix = "Proj"
 
-[node name="Configurer" type="Node" parent="ProjectileManager"]
-script = ExtResource("19_23ovg")
+[node name="RecolorProjectileManager" type="Node" parent="ProjectileManager" node_paths=PackedStringArray("player")]
+script = ExtResource("18_lfneg")
+player = NodePath("../..")
 
 [node name="Abilities" type="Node2D" parent="."]
 

@@ -50,8 +50,10 @@ func _on_ability_used(ability_type: PlayerInput.AbilityType, pressed: bool):
 
 
 ## Stars the cooldown for this ability
-func start_cooldown():
+func start_cooldown(preprocess: float = 0):
 	_cooldown_timer = cooldown
+	if preprocess > 0:
+		_cooldown_timer = maxf(_cooldown_timer - preprocess, 0)
 	set_process(true)
 
 

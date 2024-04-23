@@ -86,9 +86,16 @@ func _ready():
 
 
 func teleport_to(position: Vector2):
+	_teleport_to_clients.rpc(position)
+
+
+@rpc("authority", "call_local", "reliable")
+func _teleport_to_clients(position: Vector2):
 	server_position = position
-	visuals_container.global_position = position
 	player.global_position = position
+	visuals_container.global_position = position
+	if _is_interpolating:
+		_interpolate_timer = -1
 
 
 func _start_interpolate_to_server_pos():

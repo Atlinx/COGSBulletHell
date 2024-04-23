@@ -226,6 +226,17 @@ func client_to_server_time(client_time_ms: float):
 	return client_time_ms + server_time_offset_ms
 
 
+## Checks if a client and server time difference is within
+## acceptable levels. 
+##
+## This  is used for netcode that requires clients to send 
+## their start time of a given action. We don't want
+## client to spoof their start time too far back in the past
+## or to spoof their time into the future. 
+func is_acceptable_time_diff(time_diff: float) -> bool:
+	return time_diff >= 0 and time_diff < average_latency * 2
+
+
 func reset_game():
 	if peer and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
 		peer.close()
