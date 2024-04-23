@@ -32,13 +32,22 @@ signal round_spawned
 @export var rounds: int = 1
 @export var round_interval: float = 1
 @export var round_angle_offset: float = 0
+@export var spawn_delay: float 
+@export var spawn_on_ready: bool
 @export var local_data: Dictionary
 
 
+func _ready():
+	if spawn_on_ready and is_multiplayer_authority():
+		spawn.call_deferred()
+
+
 func spawn(_prefab_index: int = prefab_index):
+	if spawn_delay > 0:
+		await get_tree().create_timer(spawn_delay).timeout
 	var angle_per_bullet: float
 	if is_radial:
-		angle_per_bullet = TAU / (amount + 1)
+		angle_per_bullet = TAU / amount
 	else:
 		angle_per_bullet = arc / amount
 	for r in range(rounds):

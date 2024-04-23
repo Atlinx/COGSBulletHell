@@ -5,6 +5,7 @@ extends Node
 signal game_reseted
 signal game_started
 signal game_ticked
+signal my_player_spawned(my_player: Player)
 
 
 class GamePlayer extends RefCounted:
@@ -153,6 +154,8 @@ func _spawn_player(player_id: int, location: int):
 	if not is_in_game and loaded_players == network_manager.network_players.size():
 		is_in_game = true
 		game_started.emit()
+	if player_inst.is_controlling_player:
+		my_player_spawned.emit(player_inst)
 
 
 func _on_player_died(killing_damage_info: DamageInfo, player: Player):

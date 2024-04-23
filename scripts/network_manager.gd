@@ -29,10 +29,11 @@ static var instance: NetworkManager
 @export var ping_sample_count: int = 10
 @export var max_players: int = 8
 @export_group("Verification")
-@export var acceptable_time_diff_factor: float = 7 # ms
-@export var acceptable_time_diff_min: float = 8 # ms
-@export var acceptable_position_diff_factor: float = 0.05 # pixels * ms
+@export var acceptable_time_diff_factor: float = 10 # ms
+@export var acceptable_time_diff_min: float = 16 # ms
+@export var acceptable_position_diff_factor: float = 0.1 # pixels * ms
 @export var acceptable_position_diff_min: float = 32 # pixels
+@export var max_unacknowledged_ping_time: float = 3
 
 var peer: ENetMultiplayerPeer
 var game_state: GameState = GameState.IDLE
@@ -328,8 +329,10 @@ func acceptable_time_diff_ms(peer_id: int) -> float:
 ## their start position of a given action. We don't want
 ## client to spoof their start position to far from
 ## their current position. 
-func is_acceptable_position_diff(peer_id: int, position_diff_sqr: float, speed: float) -> bool:
-	var factor = acceptable_position_diff(peer_id, speed)
+func is_acceptable_position_diff(peer_id: int, position_diff_sqr: float, speed: float, instant_buffer: float = 0) -> bool:
+	var factor = acceptable_position_diff(peer_id, speed, instant_buffer)
+	if position_diff_sqr >= factor * factor:
+		print("Unacceptable position diff: ", sqrt(position_diff_sqr), " >= factor: ", factor, " given speed: ", speed, " buffer: ", instant_buffer)
 	return position_diff_sqr < factor * factor
 
 
@@ -340,8 +343,8 @@ func is_acceptable_position_diff(peer_id: int, position_diff_sqr: float, speed: 
 ## their start position of a given action. We don't want
 ## client to spoof their start position to far from
 ## their current position. 
-func acceptable_position_diff(peer_id: int, speed: float) -> float:
-	return max(get_player(peer_id).average_latency_ms * acceptable_position_diff_factor * speed, acceptable_position_diff_min)
+func acceptable_position_diff(peer_id: int, speed: float, instant_buffer: float = 0) -> float:
+	return max(get_player(peer_id).average_latency_ms * acceptable_position_diff_factor * speed, acceptable_position_diff_min) + instant_buffer
 
 
 func reset_game():
@@ -372,7 +375,12 @@ func _process(delta):
 func _ping_prepare():
 	var start_time = client_time_ms
 	for network_player: NetworkPlayer in network_players.values():
+		if network_player.multiplayer_id == 1:
+			continue
 		network_player.unacknowledged_pings[_ping_id] = start_time
+		var time_since_last_acknowledged = network_player.unacknowledged_pings.size() * ping_interval
+		if time_since_last_acknowledged > max_unacknowledged_ping_time:
+			kick_player.rpc_id(network_player.multiplayer_id, "Failed to acknowledge pings")
 	_ping.rpc(_ping_id)
 	_ping_id += 1
 
@@ -380,8 +388,7 @@ func _ping_prepare():
 ## Ping step 2: Client responds to ping request
 @rpc("authority", "call_remote", "reliable")
 func _ping(ping_id: int):
-	for network_player: NetworkPlayer in network_players.values():
-		_ping_response.rpc_id(network_player.multiplayer_id, client_time_ms, ping_id)
+	_ping_response.rpc_id(1, client_time_ms, ping_id)
 
 
 ## Ping step 3: Server responds to client's response to the ping request, 
@@ -394,6 +401,7 @@ func _ping_response(start_time_ms: float, ping_id: int):
 		return
 	var rtt_ms = client_time_ms - player.unacknowledged_pings.get(ping_id)
 	player.update_rtt(rtt_ms, ping_sample_count)
+	player.unacknowledged_pings.erase(ping_id)
 	player.last_acknowledged_ping_id += 1
 	_ping_response_response.rpc_id(multiplayer.get_remote_sender_id(), start_time_ms, client_time_ms)
 

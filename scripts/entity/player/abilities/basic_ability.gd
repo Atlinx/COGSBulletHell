@@ -51,21 +51,20 @@ func use():
 # TODO: Replace any_peer to appropriate authority
 # Right now, any player can also control any other player through
 # arbitrary rpc calls
-@rpc("any_peer", "call_local", "reliable")
+@rpc("any_peer", "call_remote", "reliable")
 func _use_server(start_time: float, data: Dictionary):
 	var diff = network_manager.server_time - start_time
-	if manual_player:
-		if not network_manager.is_acceptable_time_diff(manual_player.multiplayer_id, diff):
-			return
-		if ability.on_cooldown:
-			cooldown_used.emit()
-			return
+	if manual_player and not network_manager.is_acceptable_time_diff(manual_player.multiplayer_id, diff):
+		return
+	if ability.on_cooldown:
+		cooldown_used.emit()
+		return
 	for child in get_children():
 		if child.has_method("_receive_ability_data"):
 			child._receive_ability_data(data)
 	# Make cooldown run a little faster on server to avoid cases where client tries to
 	# use ability and it was still barely on cooldown.
-	ability.start_cooldown(diff + ability.cooldown * 0.1)
+	ability.start_cooldown(diff + network_manager.get_player(manual_player.multiplayer_id).average_rtt * 2)
 	used.emit()
 
 

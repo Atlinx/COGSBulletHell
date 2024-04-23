@@ -2,9 +2,9 @@ class_name PlayerSpawnProjectiles
 extends Node
 
 
-@export var spawn_projectiles: SpawnProjectiles
 @export var player: Player
 
+@onready var spawn_projectiles: SpawnProjectiles = get_node("SpawnProjectiles")
 var network_manager: NetworkManager
 var manual_player: ManualPlayer
 var player_move: PlayerMove

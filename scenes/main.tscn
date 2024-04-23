@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=25 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/levels/level_big.tscn" id="1_negoe"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://d1u57e7wtp2f2" path="res://assets/art/app/icon.png" id="7_avgvb"]
 [ext_resource type="PackedScene" uid="uid://cn7aloedpuwjr" path="res://scenes/ui/scoreboard_entry.tscn" id="8_y3w7w"]
 [ext_resource type="PackedScene" uid="uid://c5ah4utikwf8k" path="res://scenes/manual_player.tscn" id="12_206qu"]
+[ext_resource type="PackedScene" uid="uid://c63epk47w3vp2" path="res://scenes/ui/ability_indicator.tscn" id="12_rd10t"]
 [ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="13_3ofs7"]
 [ext_resource type="Resource" uid="uid://dembgtbg6r00f" path="res://assets/palettes/p2_palette.tres" id="14_fdi5q"]
 [ext_resource type="Resource" uid="uid://bvuydkjiv6qdj" path="res://assets/palettes/p3_palette.tres" id="16_3lkbo"]
@@ -240,23 +241,27 @@ text = "Ready"
 layout_mode = 2
 text = "Leave"
 
-[node name="GameplayUI" type="Control" parent="UI/UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button", "scoreboard")]
+[node name="GameplayUI" type="Control" parent="UI/UI" node_paths=PackedStringArray("network_manager", "game_manager", "info_label", "disconnect_button", "scoreboard", "primary_ability_indicator", "secondary_ability_indicator", "utility_ability_indicator", "special_ability_indicator")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("4_lewxl")
 network_manager = NodePath("../../../NetworkManager")
 game_manager = NodePath("../../../GameManager")
-info_label = NodePath("MarginContainer/VBoxContainer/InfoLabel")
-disconnect_button = NodePath("MarginContainer/VBoxContainer/DisconnectButton")
+info_label = NodePath("TopLeft/VBoxContainer/InfoLabel")
+disconnect_button = NodePath("TopLeft/VBoxContainer/DisconnectButton")
 scoreboard_entry_prefab = ExtResource("8_y3w7w")
-scoreboard = NodePath("MarginContainer2/VBoxContainer/ScoreboardContainer")
-show_host_debug = true
+scoreboard = NodePath("PanelContainer/MarginContainer/VBoxContainer/ScoreboardContainer")
+primary_ability_indicator = NodePath("PanelContainer2/BottomRight/AbilityIndicatorsContainer/PrimaryAbilityIndicator")
+secondary_ability_indicator = NodePath("PanelContainer2/BottomRight/AbilityIndicatorsContainer/SecondaryAbilityIndicator2")
+utility_ability_indicator = NodePath("PanelContainer2/BottomRight/AbilityIndicatorsContainer/UtilityAbilityIndicator3")
+special_ability_indicator = NodePath("PanelContainer2/BottomRight/AbilityIndicatorsContainer/SpecialAbilityIndicator4")
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI"]
+[node name="TopLeft" type="MarginContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -265,44 +270,87 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/TopLeft"]
 layout_mode = 2
 
-[node name="DisconnectButton" type="Button" parent="UI/UI/GameplayUI/MarginContainer/VBoxContainer"]
+[node name="DisconnectButton" type="Button" parent="UI/UI/GameplayUI/TopLeft/VBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 text = "Disconnect"
 
-[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/MarginContainer/VBoxContainer"]
+[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/TopLeft/VBoxContainer"]
 layout_mode = 2
 text = "Player 11"
 
-[node name="MarginContainer2" type="MarginContainer" parent="UI/UI/GameplayUI"]
+[node name="PanelContainer" type="PanelContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -232.0
-offset_bottom = 90.0
+offset_left = -210.0
+offset_bottom = 99.0
 grow_horizontal = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI/PanelContainer"]
+layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer"]
+[node name="InfoLabel" type="Label" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Scoreboard"
 
-[node name="ScoreboardContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer"]
+[node name="ScoreboardContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HSplitContainer" parent="UI/UI/GameplayUI/MarginContainer2/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
+[node name="HSplitContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
 layout_mode = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="UI/UI/GameplayUI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -236.0
+offset_top = -80.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BottomRight" type="MarginContainer" parent="UI/UI/GameplayUI/PanelContainer2"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="AbilityIndicatorsContainer" type="HBoxContainer" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PrimaryAbilityIndicator" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+layout_mode = 2
+
+[node name="SecondaryAbilityIndicator2" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+layout_mode = 2
+
+[node name="UtilityAbilityIndicator3" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+layout_mode = 2
+
+[node name="SpecialAbilityIndicator4" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI"]
+layout_mode = 0
+offset_right = 48.0
+offset_bottom = 48.0
 
 [node name="NetworkManager" type="Node" parent="."]
 script = ExtResource("1_fnu50")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=3 uid="uid://dwovq5jl3h058"]
+[gd_scene load_steps=60 format=3 uid="uid://dwovq5jl3h058"]
 
 [ext_resource type="Script" path="res://scripts/entity/player/player.gd" id="1_mmakg"]
 [ext_resource type="Texture2D" uid="uid://bm67n2aohwhrw" path="res://icon.svg" id="1_mtwg5"]
@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/entity/player/player_aim.gd" id="16_hyj00"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_move.gd" id="16_n30vn"]
 [ext_resource type="Script" path="res://scripts/projectiles/spawn_projectiles.gd" id="16_rkx3d"]
+[ext_resource type="PackedScene" uid="uid://b3da3iufxn1bw" path="res://scenes/projectiles/spell_portal.tscn" id="17_mlnuf"]
 [ext_resource type="Script" path="res://scripts/entity/player/inputs/player_input.gd" id="17_tqdpq"]
 [ext_resource type="Script" path="res://scripts/projectiles/prefix_projectile_manager.gd" id="17_wq0de"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_ability.gd" id="18_3pbvy"]
@@ -29,10 +30,15 @@
 [ext_resource type="Script" path="res://scripts/entity/player/abilities/basic_ability.gd" id="20_fr7uk"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_animation_player.gd" id="20_qpu25"]
 [ext_resource type="Script" path="res://scripts/projectiles/destroy.gd" id="21_l70jj"]
+[ext_resource type="Texture2D" uid="uid://c6mj2ug1duloj" path="res://assets/art/abilities/magic_missile.png" id="21_m4hxx"]
 [ext_resource type="Script" path="res://scripts/projectiles/manual_activate_source.gd" id="22_85sgm"]
 [ext_resource type="Script" path="res://scripts/entity/player/player_spawn_projectiles.gd" id="22_so6c5"]
 [ext_resource type="Texture2D" uid="uid://dc236m2hrwthv" path="res://assets/art/fx/64_star_fx.png" id="23_jxqk7"]
-[ext_resource type="Script" path="res://scripts/entity/player/abilities/teleport_ability.gd" id="24_bgcfl"]
+[ext_resource type="Texture2D" uid="uid://cmkceunykylow" path="res://assets/art/abilities/spell_bomb.png" id="25_k3djh"]
+[ext_resource type="Script" path="res://scripts/entity/player/abilities/range_ability.gd" id="25_s0uvj"]
+[ext_resource type="Script" path="res://scripts/entity/player/abilities/player_teleport.gd" id="26_ug8di"]
+[ext_resource type="Texture2D" uid="uid://cqvk7jg8klv0q" path="res://assets/art/abilities/magic_blink.png" id="28_83si2"]
+[ext_resource type="Texture2D" uid="uid://dceud8lyg7d6n" path="res://assets/art/abilities/spell_portal.png" id="32_8sflu"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1u1l7"]
 shader = ExtResource("3_1mnd0")
@@ -92,6 +98,50 @@ scale_curve = SubResource("CurveTexture_nfk6y")
 _data = [Vector2(0, 0), 0.0, 2.23041, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
+[sub_resource type="Curve" id="Curve_lun75"]
+_data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_mi4jo"]
+curve = SubResource("Curve_lun75")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_thcpm"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+spread = 180.0
+initial_velocity_min = 250.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 70.0
+damping_max = 70.0
+scale_curve = SubResource("CurveTexture_mi4jo")
+
+[sub_resource type="Curve" id="Curve_w5hix"]
+_data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_033p7"]
+curve = SubResource("Curve_w5hix")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ttm8u"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+spread = 180.0
+initial_velocity_min = 250.0
+initial_velocity_max = 300.0
+gravity = Vector3(0, 0, 0)
+damping_min = 70.0
+damping_max = 70.0
+scale_curve = SubResource("CurveTexture_033p7")
+
 [sub_resource type="Curve" id="Curve_qcomm"]
 _data = [Vector2(0.310502, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.61586, 0.0, 0, 0]
 point_count = 2
@@ -113,6 +163,9 @@ gravity = Vector3(0, 0, 0)
 damping_min = 70.0
 damping_max = 70.0
 scale_curve = SubResource("CurveTexture_m5qes")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6gqhb"]
+radius = 32.0
 
 [node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("palette_swap", "team", "health", "visuals_container")]
 collision_layer = 2
@@ -204,7 +257,7 @@ team = "Player"
 script = ExtResource("3_0uggd")
 prefix = "Player"
 team = NodePath("../Team")
-prefabs = Array[PackedScene]([ExtResource("14_58vdw"), ExtResource("15_v3m2w")])
+prefabs = Array[PackedScene]([ExtResource("14_58vdw"), ExtResource("15_v3m2w"), ExtResource("17_mlnuf")])
 projectiles_limit = 10000
 
 [node name="PrefixProjectileManager" type="Node" parent="ProjectileManager" node_paths=PackedStringArray("base_node")]
@@ -222,15 +275,15 @@ player = NodePath("../..")
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 cooldown = 1.0
+ability_icon = ExtResource("21_m4hxx")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Primary" node_paths=PackedStringArray("player")]
 script = ExtResource("20_fr7uk")
 use_on_released = false
 player = NodePath("../../..")
 
-[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility" node_paths=PackedStringArray("spawn_projectiles", "player")]
+[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility" node_paths=PackedStringArray("player")]
 script = ExtResource("22_so6c5")
-spawn_projectiles = NodePath("SpawnProjectiles")
 player = NodePath("../../../..")
 
 [node name="SpawnProjectiles" type="Node" parent="Abilities/Primary/BasicAbility/PlayerSpawnProjectiles" node_paths=PackedStringArray("projectile_manager", "muzzle")]
@@ -240,6 +293,7 @@ muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 amount = 1
 rounds = 3
 round_interval = 0.1
+spawn_delay = null
 local_data = {
 "speed": 1000.0
 }
@@ -249,6 +303,7 @@ script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 1
 cooldown = 3.0
+ability_icon = ExtResource("25_k3djh")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Secondary" node_paths=PackedStringArray("player")]
 script = ExtResource("20_fr7uk")
@@ -256,9 +311,8 @@ use_on_released = false
 use_while_pressed = false
 player = NodePath("../../..")
 
-[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility" node_paths=PackedStringArray("spawn_projectiles", "player")]
+[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility" node_paths=PackedStringArray("player")]
 script = ExtResource("22_so6c5")
-spawn_projectiles = NodePath("SpawnProjectiles")
 player = NodePath("../../../..")
 
 [node name="SpawnProjectiles" type="Node" parent="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles" node_paths=PackedStringArray("projectile_manager", "muzzle")]
@@ -267,6 +321,7 @@ projectile_manager = NodePath("../../../../../ProjectileManager")
 muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 prefab_index = 1
 amount = 1
+spawn_delay = null
 
 [node name="ManualDetonateSource" type="Node" parent="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles/SpawnProjectiles"]
 script = ExtResource("22_85sgm")
@@ -289,10 +344,11 @@ script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 2
 cooldown = 1.0
+ability_icon = ExtResource("28_83si2")
 
-[node name="TeleportAbility" type="Node" parent="Abilities/Utility" node_paths=PackedStringArray("teleport_marker", "player", "player_input", "player_move")]
-script = ExtResource("24_bgcfl")
-teleport_marker = NodePath("../TPMarker")
+[node name="RangeAbility" type="Node" parent="Abilities/Utility" node_paths=PackedStringArray("marker", "player", "player_input", "player_move")]
+script = ExtResource("25_s0uvj")
+marker = NodePath("../TPMarker")
 select_range = 700.0
 select_duration = 1.0
 select_curve = SubResource("Curve_5d4jj")
@@ -300,16 +356,77 @@ player = NodePath("../../..")
 player_input = NodePath("../../../PlayerInput")
 player_move = NodePath("../../../PlayerMove")
 
+[node name="PlayerTeleport" type="Node" parent="Abilities/Utility/RangeAbility" node_paths=PackedStringArray("player", "player_move", "body_shape_cast", "tp_source_fx", "tp_dest_fx")]
+script = ExtResource("26_ug8di")
+player = NodePath("../../../..")
+player_move = NodePath("../../../../PlayerMove")
+body_shape_cast = NodePath("../../../../BodyShapeCast2D")
+tp_source_fx = NodePath("../../TeleportSourceFX")
+tp_dest_fx = NodePath("../../TeleportDestFX")
+
 [node name="TPMarker" type="Sprite2D" parent="Abilities/Utility"]
 self_modulate = Color(1, 1, 1, 0.490196)
 z_index = -5
 texture = ExtResource("23_jxqk7")
+
+[node name="TeleportSourceFX" type="Node2D" parent="Abilities/Utility"]
+script = ExtResource("7_c6snw")
+lifetime = 2.0
+
+[node name="TeleportSourceParticles" type="GPUParticles2D" parent="Abilities/Utility/TeleportSourceFX"]
+self_modulate = Color(0.262745, 0.658824, 0.894118, 1)
+z_index = 10
+emitting = false
+amount = 6
+process_material = SubResource("ParticleProcessMaterial_thcpm")
+texture = ExtResource("23_jxqk7")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.8
+script = ExtResource("9_kxbcm")
+repeat_oneshot = true
+
+[node name="TeleportDestFX" type="Node2D" parent="Abilities/Utility"]
+script = ExtResource("7_c6snw")
+lifetime = 2.0
+
+[node name="TeleportDestParticles" type="GPUParticles2D" parent="Abilities/Utility/TeleportDestFX"]
+self_modulate = Color(0.262745, 0.658824, 0.894118, 1)
+z_index = 10
+emitting = false
+amount = 6
+process_material = SubResource("ParticleProcessMaterial_ttm8u")
+texture = ExtResource("23_jxqk7")
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.8
+script = ExtResource("9_kxbcm")
+repeat_oneshot = true
 
 [node name="Special" type="Node2D" parent="Abilities" node_paths=PackedStringArray("player_input")]
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 3
 cooldown = 10.0
+ability_icon = ExtResource("32_8sflu")
+
+[node name="BasicAbility" type="Node" parent="Abilities/Special" node_paths=PackedStringArray("player")]
+script = ExtResource("20_fr7uk")
+use_on_released = false
+use_while_pressed = false
+player = NodePath("../../..")
+
+[node name="PlayerSpawnProjectiles" type="Node" parent="Abilities/Special/BasicAbility" node_paths=PackedStringArray("player")]
+script = ExtResource("22_so6c5")
+player = NodePath("../../../..")
+
+[node name="SpawnProjectiles" type="Node" parent="Abilities/Special/BasicAbility/PlayerSpawnProjectiles" node_paths=PackedStringArray("projectile_manager", "muzzle")]
+script = ExtResource("16_rkx3d")
+projectile_manager = NodePath("../../../../../ProjectileManager")
+muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
+prefab_index = 2
+amount = 1
+spawn_delay = null
 
 [node name="PlayerAim" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "fire_rotation", "muzzle")]
 script = ExtResource("16_hyj00")
@@ -330,7 +447,7 @@ script = ExtResource("17_tqdpq")
 [node name="PlayerPaletteSwap" type="Node" parent="." node_paths=PackedStringArray("visuals", "self_modulate_0")]
 script = ExtResource("18_lmg5v")
 visuals = [NodePath("../VisualsContainer/Visuals")]
-self_modulate_0 = [NodePath("../FireRotation/Muzzle/ShootFX/ShootGPUParticles2D"), NodePath("../Destroy/DeathFX/DeathGPUParticles2D"), NodePath("../Abilities/Secondary/SecondaryCDFX/SecondaryCDParticleFX")]
+self_modulate_0 = [NodePath("../FireRotation/Muzzle/ShootFX/ShootGPUParticles2D"), NodePath("../Destroy/DeathFX/DeathGPUParticles2D"), NodePath("../Abilities/Secondary/SecondaryCDFX/SecondaryCDParticleFX"), NodePath("../Abilities/Utility/TeleportDestFX/TeleportDestParticles"), NodePath("../Abilities/Utility/TeleportSourceFX/TeleportSourceParticles")]
 
 [node name="GlowPaletteSwap" type="Node" parent="PlayerPaletteSwap" node_paths=PackedStringArray("self_modulate_0")]
 script = ExtResource("18_lmg5v")
@@ -364,6 +481,10 @@ texture = ExtResource("8_syjy0")
 lifetime = 0.5
 one_shot = true
 explosiveness = 0.8
+
+[node name="BodyShapeCast2D" type="ShapeCast2D" parent="."]
+shape = SubResource("CircleShape2D_6gqhb")
+target_position = Vector2(0, 0)
 
 [connection signal="damaged" from="Health" to="VisualsContainer/Visuals/OverlayFX" method="play" unbinds=1]
 [connection signal="died" from="Health" to="Destroy" method="destroy" unbinds=1]

@@ -96,12 +96,15 @@ func _on_game_ticked():
 
 @rpc("any_peer", "call_remote", "reliable")
 func _sync_to_server(_move_direction: Vector2, _aim_direction: Vector2):
-	move_direction = _move_direction
-	aim_direction = _aim_direction
+	if not player.is_controlling_player:
+		move_direction = _move_direction
+		aim_direction = _aim_direction
 	_sync_to_clients.rpc(move_direction, aim_direction)
 
 
 @rpc("authority", "call_remote", "reliable")
 func _sync_to_clients(_move_direction: Vector2, _aim_direction: Vector2):
+	if player.is_controlling_player:
+		return
 	move_direction = _move_direction
 	aim_direction = _aim_direction

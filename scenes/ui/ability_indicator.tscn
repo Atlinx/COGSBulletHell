@@ -1,0 +1,55 @@
+[gd_scene load_steps=3 format=3 uid="uid://c63epk47w3vp2"]
+
+[ext_resource type="Script" path="res://scripts/ui/ability_indicator.gd" id="1_2ntps"]
+[ext_resource type="Texture2D" uid="uid://c6mj2ug1duloj" path="res://assets/art/abilities/magic_missile.png" id="2_vj076"]
+
+[node name="AbilityIndicator" type="ColorRect" node_paths=PackedStringArray("texture_rect", "cooldown_color_rect", "cooldown_label")]
+custom_minimum_size = Vector2(48, 48)
+color = Color(0, 0, 0, 0.603922)
+script = ExtResource("1_2ntps")
+texture_rect = NodePath("MarginContainer/TextureRect")
+cooldown_color_rect = NodePath("MarginContainer/TextureRect/CooldownColorRect")
+cooldown_label = NodePath("MarginContainer/TextureRect/CooldownColorRect/CooldownLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer"]
+layout_mode = 2
+texture = ExtResource("2_vj076")
+expand_mode = 5
+
+[node name="CooldownColorRect" type="ColorRect" parent="MarginContainer/TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.560784)
+
+[node name="CooldownLabel" type="Label" parent="MarginContainer/TextureRect/CooldownColorRect"]
+self_modulate = Color(1, 1, 1, 0.690196)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -9.5
+offset_right = 20.0
+offset_bottom = 9.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "1.1"
+horizontal_alignment = 1

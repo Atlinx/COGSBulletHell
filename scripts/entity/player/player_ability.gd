@@ -9,6 +9,8 @@ extends Node2D
 signal used_pressed
 ## Called when the ability button is released
 signal used_released
+## Called when the cooldown is started
+signal cooldown_started
 ## Called when the cooldown is over
 signal cooldown_over
 
@@ -22,6 +24,7 @@ signal cooldown_over
 		if Engine.is_editor_hint():
 			name = (PlayerInput.AbilityType.find_key(type) as String).to_pascal_case()
 @export var cooldown: float
+@export var ability_icon: Texture
 ## Whether the ability button is pressed down
 var is_used_pressed: bool :
 	get:
@@ -30,8 +33,8 @@ var is_used_pressed: bool :
 
 var on_cooldown: bool :
 	get: 
-		return _cooldown_timer >= 0
-var _cooldown_timer: float = -1
+		return _cooldown_timer > 0
+var _cooldown_timer: float = 0
 
 
 func _ready():
@@ -55,10 +58,12 @@ func start_cooldown(preprocess: float = 0):
 	if preprocess > 0:
 		_cooldown_timer = maxf(_cooldown_timer - preprocess, 0)
 	set_process(true)
+	cooldown_started.emit()
 
 
 func _process(delta):
-	if _cooldown_timer >= 0:
+	if _cooldown_timer > 0:
 		_cooldown_timer -= delta
 		if _cooldown_timer < 0:
+			_cooldown_timer = 0
 			cooldown_over.emit()
