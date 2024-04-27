@@ -29,9 +29,9 @@ static var instance: NetworkManager
 @export var ping_sample_count: int = 10
 @export var max_players: int = 8
 @export_group("Verification")
-@export var acceptable_time_diff_factor: float = 10 # ms
+@export var acceptable_time_diff_factor: float = 50 # ms
 @export var acceptable_time_diff_min: float = 16 # ms
-@export var acceptable_position_diff_factor: float = 0.1 # pixels * ms
+@export var acceptable_position_diff_factor: float = 0.2 # pixels * ms
 @export var acceptable_position_diff_min: float = 32 # pixels
 @export var max_unacknowledged_ping_time: float = 3
 
@@ -94,6 +94,9 @@ var client_time_ms: float
 ## client_time_ms + server_time_offset_ms = server_time_ms
 var server_time_offset_ms: float
 
+## Is my own player a bot?
+var is_self_bot: bool
+
 
 var _ping_timer: float
 ## Used by client to track average latency to server
@@ -118,6 +121,7 @@ var _peers_waiting_approval: Dictionary = {}
 class NetworkPlayer extends RefCounted:
 	var multiplayer_id: int
 	var username: String
+	var is_bot: bool
 	var readied_up: bool
 	var average_rtt: float :
 		get:
@@ -154,6 +158,7 @@ class NetworkPlayer extends RefCounted:
 		return {
 			"multiplayer_id": multiplayer_id,
 			"username": username,
+			"is_bot": is_bot,
 			"readied_up": readied_up
 		}
 	
@@ -161,6 +166,7 @@ class NetworkPlayer extends RefCounted:
 		multiplayer_id = dict.get("multiplayer_id")
 		username = dict.get("username")
 		readied_up = dict.get("readied_up")
+		is_bot = dict.get("is_bot")
 
 
 # [multiplayer_id: int]: NetworkPlayer
@@ -358,6 +364,7 @@ func reset_game():
 	server_time_offset_ms = 0
 	_connection_approved = false
 	_peers_waiting_approval = {}
+	is_self_bot = false
 
 
 func _process(delta):
@@ -434,13 +441,15 @@ func _on_connection_to_server_approved(_network_players: Array):
 	_my_network_player.multiplayer_id = multiplayer.get_unique_id()
 	_my_network_player.readied_up = false
 	_my_network_player.username = "Player" + str(multiplayer.get_unique_id())
+	_my_network_player.is_bot = is_self_bot
 	network_players[_my_network_player.multiplayer_id] = _my_network_player
 	update_my_network_player()
 	connected_to_server.emit()
 
 
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_remote", "reliable")
 func _notify_peer_approved(peer_id: int):
+	print("_notify_peer_approved: ", peer_id)
 	var new_network_player = NetworkPlayer.new()
 	new_network_player.multiplayer_id = peer_id
 	network_players[peer_id] = new_network_player
@@ -481,6 +490,7 @@ func _on_peer_connected(id: int):
 				kick_player.rpc_id(id, "Lobby is full")
 				return
 			_peers_waiting_approval[id] = { 1: null }
+			_notify_peer_approved(id)
 			# Notify existing peers that new peer has been approved
 			_notify_peer_approved.rpc(id)
 		else:

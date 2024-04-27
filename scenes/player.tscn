@@ -293,7 +293,6 @@ muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 amount = 1
 rounds = 3
 round_interval = 0.1
-spawn_delay = null
 local_data = {
 "speed": 1000.0
 }
@@ -321,7 +320,6 @@ projectile_manager = NodePath("../../../../../ProjectileManager")
 muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 prefab_index = 1
 amount = 1
-spawn_delay = null
 
 [node name="ManualDetonateSource" type="Node" parent="Abilities/Secondary/BasicAbility/PlayerSpawnProjectiles/SpawnProjectiles"]
 script = ExtResource("22_85sgm")
@@ -407,7 +405,7 @@ repeat_oneshot = true
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 3
-cooldown = 30.0
+cooldown = 1.0
 ability_icon = ExtResource("32_8sflu")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Special" node_paths=PackedStringArray("player")]
@@ -426,7 +424,6 @@ projectile_manager = NodePath("../../../../../ProjectileManager")
 muzzle = NodePath("../../../../../FireRotation/Muzzle/MuzzleTip")
 prefab_index = 2
 amount = 1
-spawn_delay = null
 
 [node name="PlayerAim" type="Node" parent="." node_paths=PackedStringArray("visuals", "input", "fire_rotation", "muzzle")]
 script = ExtResource("16_hyj00")

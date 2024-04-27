@@ -9,6 +9,7 @@ extends Control
 @export var host_button: Button
 @export var join_button: Button
 @export var cancel_button: Button
+@export var bot_checkbox: CheckBox
 
 
 var _is_joining: bool
@@ -20,11 +21,17 @@ func _ready():
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	network_manager.game_reseted.connect(_on_game_reseted)
 	network_manager.connected_to_server.connect(_on_connected_to_server)
+	bot_checkbox.toggled.connect(_on_bot_checkbox_toggled)
 
 
 func _on_game_reseted():
 	cancel_button.visible = false
+	bot_checkbox.button_pressed = false
 	_set_ui_disabled(false)
+
+
+func _on_bot_checkbox_toggled(toggled: bool):
+	network_manager.is_self_bot = toggled
 
 
 func _on_host_pressed():

@@ -551,7 +551,7 @@ speed = 200.0
 
 [node name="LifetimeSpawnProjectiles" type="Node" parent="." node_paths=PackedStringArray("projectile_manager", "muzzle")]
 script = ExtResource("14_mcai7")
-projectile_manager = NodePath("../Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager")
+projectile_manager = NodePath("ProjectileManager")
 muzzle = NodePath("../Destroy/SpellFX")
 muzzle_offset = 64.0
 amount = 8
@@ -559,7 +559,6 @@ is_radial = true
 rounds = 100
 round_interval = 0.5
 round_angle_offset = 20.0
-spawn_delay = null
 spawn_on_ready = true
 local_data = {
 "speed": 300.0
@@ -567,21 +566,17 @@ local_data = {
 
 [node name="ProjectileManager" type="Node" parent="LifetimeSpawnProjectiles" node_paths=PackedStringArray("team")]
 script = ExtResource("15_c4u7n")
-team = NodePath("../../Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager/ProjManagerTeam")
+team = NodePath("../../Team")
 prefabs = Array[PackedScene]([ExtResource("16_hrjgq")])
 
 [node name="PrefixProjectileManager" type="Node" parent="LifetimeSpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("base_node")]
 script = ExtResource("17_hfvgu")
 base_node = NodePath("../../..")
-prefix = "Spell"
+prefix = "Portal"
 
 [node name="RecolorProjectileManager" type="Node" parent="LifetimeSpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("projectile")]
 script = ExtResource("18_w3va6")
 projectile = NodePath("../../..")
-
-[node name="ProjManagerTeam" type="Node" parent="LifetimeSpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("source_team")]
-script = ExtResource("19_8pwdm")
-source_team = NodePath("../../../Team")
 
 [node name="Destroy" type="Node2D" parent="."]
 script = ExtResource("9_o18ix")
@@ -638,8 +633,6 @@ is_radial = true
 rounds = 4
 round_interval = 0.35
 round_angle_offset = 45.0
-spawn_delay = null
-spawn_on_ready = null
 local_data = {
 "speed": 400.0
 }
@@ -652,7 +645,7 @@ prefabs = Array[PackedScene]([ExtResource("16_hrjgq")])
 [node name="PrefixProjectileManager" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("base_node")]
 script = ExtResource("17_hfvgu")
 base_node = NodePath("../../../../../..")
-prefix = "Spell"
+prefix = "Bomb"
 
 [node name="RecolorProjectileManager" type="Node" parent="Destroy/SpellFX/SpellPostFX/SpawnProjectiles/ProjectileManager" node_paths=PackedStringArray("projectile")]
 script = ExtResource("18_w3va6")

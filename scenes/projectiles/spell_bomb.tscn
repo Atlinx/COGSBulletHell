@@ -604,8 +604,6 @@ is_radial = true
 rounds = 4
 round_interval = 0.35
 round_angle_offset = 45.0
-spawn_delay = null
-spawn_on_ready = null
 local_data = {
 "speed": 400.0
 }

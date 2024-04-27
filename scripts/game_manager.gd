@@ -34,13 +34,14 @@ class GamePlayer extends RefCounted:
 
 static var instance: GameManager
 
-@export var tick_interval: float = 1/10.0
+@export var tick_interval: float = 1/24.0
 @export var spawn_interval: float = 2
 @export var world: Node2D
 @export var network_manager: NetworkManager
 @export var level_manager: LevelManager
 @export var player_prefab: PackedScene
 @export var manual_player_prefab: PackedScene
+@export var manual_bot_player_prefab: PackedScene
 @export var color_palettes: Array[ColorPalette]
 
 ## [player_id: int]: GamePlayer
@@ -136,8 +137,12 @@ func _spawn_players():
 @rpc("authority", "call_local", "reliable")
 func _spawn_player(player_id: int, location: int):
 	var game_player = get_player(player_id)
-	var player_inst = player_prefab.instantiate() as Player
-	var manual_player = manual_player_prefab.instantiate() as ManualPlayer
+	var player_inst = player_prefab.instantiate() as Player	
+	var manual_player: ManualPlayer
+	if game_player.network_player.is_bot:
+		manual_player = manual_bot_player_prefab.instantiate() as ManualPlayer
+	else:
+		manual_player = manual_player_prefab.instantiate() as ManualPlayer
 	player_inst.add_child(manual_player)
 	manual_player.pre_construct(game_player, "Player" + str(game_player.network_player_index))
 	player_inst.global_position = level_manager.spawnpoints[location].global_position

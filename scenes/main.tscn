@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=26 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/levels/level_big.tscn" id="1_negoe"]
@@ -19,6 +19,7 @@
 [ext_resource type="Resource" uid="uid://dv5umcpiewdif" path="res://assets/palettes/p1_palette.tres" id="13_3ofs7"]
 [ext_resource type="Resource" uid="uid://dembgtbg6r00f" path="res://assets/palettes/p2_palette.tres" id="14_fdi5q"]
 [ext_resource type="Resource" uid="uid://bvuydkjiv6qdj" path="res://assets/palettes/p3_palette.tres" id="16_3lkbo"]
+[ext_resource type="PackedScene" uid="uid://bubhiqf8hcicc" path="res://scenes/manual_bot_player.tscn" id="17_gnoow"]
 [ext_resource type="Resource" uid="uid://cg650mhmubesb" path="res://assets/palettes/p4_palette.tres" id="17_o2b06"]
 [ext_resource type="Resource" uid="uid://ca3yc4rqlnxx8" path="res://assets/palettes/p5_palette.tres" id="18_g4vh6"]
 [ext_resource type="Resource" uid="uid://bejwh7pj8abon" path="res://assets/palettes/p6_palette.tres" id="19_ltbxw"]
@@ -71,7 +72,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.184314, 0.203922, 0.380392, 1)
 
-[node name="MainMenu" type="Control" parent="UI/UI/MenuManager" node_paths=PackedStringArray("menu_manager", "network_manager", "ip_line_edit", "port_line_edit", "host_button", "join_button", "cancel_button")]
+[node name="MainMenu" type="Control" parent="UI/UI/MenuManager" node_paths=PackedStringArray("menu_manager", "network_manager", "ip_line_edit", "port_line_edit", "host_button", "join_button", "cancel_button", "bot_checkbox")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -86,6 +87,7 @@ port_line_edit = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxCo
 host_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3/HostButton")
 join_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/HSplitContainer3/JoinButton")
 cancel_button = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/CancelButton")
+bot_checkbox = NodePath("PanelContainer/MarginContainer/HSplitContainer/VBoxContainer/BotCheckBox")
 
 [node name="PanelContainer" type="PanelContainer" parent="UI/UI/MenuManager/MainMenu"]
 custom_minimum_size = Vector2(250, 0)
@@ -164,6 +166,11 @@ text = "Join"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Cancel"
+
+[node name="BotCheckBox" type="CheckBox" parent="UI/UI/MenuManager/MainMenu/PanelContainer/MarginContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+text = " Bot"
+flat = true
 
 [node name="Lobby" type="Control" parent="UI/UI/MenuManager" node_paths=PackedStringArray("network_manager", "ready_button", "leave_button", "lobby_info_label", "lobby_users_label", "username_line_edit")]
 visible = false
@@ -362,4 +369,5 @@ network_manager = NodePath("../NetworkManager")
 level_manager = NodePath("../LevelManager")
 player_prefab = ExtResource("6_qj4uo")
 manual_player_prefab = ExtResource("12_206qu")
+manual_bot_player_prefab = ExtResource("17_gnoow")
 color_palettes = Array[Resource("res://scripts/color_palette.gd")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q"), ExtResource("16_3lkbo"), ExtResource("17_o2b06"), ExtResource("18_g4vh6"), ExtResource("19_ltbxw"), ExtResource("20_qxqyi"), ExtResource("21_vb1lf")])

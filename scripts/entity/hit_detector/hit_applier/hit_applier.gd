@@ -14,6 +14,7 @@ func get_damage_info() -> DamageInfo:
 	var attacker = null
 	var attacker_data = {}
 	if team:
-		attacker = team.entity_owner
+		if is_instance_valid(team.entity_owner):
+			attacker = team.entity_owner
 		attacker_data = team.entity_owner_data
 	return DamageInfo.new(damage, is_healing, attacker, attacker_data)
