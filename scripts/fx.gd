@@ -41,7 +41,6 @@ func _ready():
 		play()
 	if prefix_name_source:
 		name = prefix_name_source.name + name
-		print("new name: based on proj: ", name)
 
 
 func play():

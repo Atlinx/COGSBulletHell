@@ -405,7 +405,7 @@ repeat_oneshot = true
 script = ExtResource("18_3pbvy")
 player_input = NodePath("../../PlayerInput")
 type = 3
-cooldown = 1.0
+cooldown = 30.0
 ability_icon = ExtResource("32_8sflu")
 
 [node name="BasicAbility" type="Node" parent="Abilities/Special" node_paths=PackedStringArray("player")]

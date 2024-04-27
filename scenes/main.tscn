@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://4uh673757wtx"]
+[gd_scene load_steps=27 format=3 uid="uid://4uh673757wtx"]
 
 [ext_resource type="Script" path="res://scripts/network_manager.gd" id="1_fnu50"]
 [ext_resource type="PackedScene" uid="uid://ly1dv26c27ff" path="res://scenes/levels/level_big.tscn" id="1_negoe"]
@@ -21,6 +21,7 @@
 [ext_resource type="Resource" uid="uid://bvuydkjiv6qdj" path="res://assets/palettes/p3_palette.tres" id="16_3lkbo"]
 [ext_resource type="PackedScene" uid="uid://bubhiqf8hcicc" path="res://scenes/manual_bot_player.tscn" id="17_gnoow"]
 [ext_resource type="Resource" uid="uid://cg650mhmubesb" path="res://assets/palettes/p4_palette.tres" id="17_o2b06"]
+[ext_resource type="Script" path="res://scripts/color_palette.gd" id="18_84ff0"]
 [ext_resource type="Resource" uid="uid://ca3yc4rqlnxx8" path="res://assets/palettes/p5_palette.tres" id="18_g4vh6"]
 [ext_resource type="Resource" uid="uid://bejwh7pj8abon" path="res://assets/palettes/p6_palette.tres" id="19_ltbxw"]
 [ext_resource type="Resource" uid="uid://clkox4bdthvif" path="res://assets/palettes/p7_palette.tres" id="20_qxqyi"]
@@ -316,8 +317,11 @@ text = "Scoreboard"
 [node name="ScoreboardContainer" type="VBoxContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HSplitContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer/ScoreboardContainer" instance=ExtResource("8_y3w7w")]
+[node name="HSplitContainer" parent="UI/UI/GameplayUI/PanelContainer/MarginContainer/VBoxContainer/ScoreboardContainer" node_paths=PackedStringArray("player_color_rect", "score_label", "username_label") instance=ExtResource("8_y3w7w")]
 layout_mode = 2
+player_color_rect = NodePath("TextureRect")
+score_label = NodePath("ScoreContainer/ScoreLabel")
+username_label = NodePath("UsernameLabel")
 
 [node name="PanelContainer2" type="PanelContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 1
@@ -342,17 +346,29 @@ theme_override_constants/margin_bottom = 16
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="PrimaryAbilityIndicator" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+[node name="PrimaryAbilityIndicator" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" node_paths=PackedStringArray("texture_rect", "cooldown_color_rect", "cooldown_label") instance=ExtResource("12_rd10t")]
 layout_mode = 2
+texture_rect = NodePath("MarginContainer/TextureRect")
+cooldown_color_rect = NodePath("MarginContainer/TextureRect/CooldownColorRect")
+cooldown_label = NodePath("MarginContainer/TextureRect/CooldownColorRect/CooldownLabel")
 
-[node name="SecondaryAbilityIndicator2" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+[node name="SecondaryAbilityIndicator2" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" node_paths=PackedStringArray("texture_rect", "cooldown_color_rect", "cooldown_label") instance=ExtResource("12_rd10t")]
 layout_mode = 2
+texture_rect = NodePath("MarginContainer/TextureRect")
+cooldown_color_rect = NodePath("MarginContainer/TextureRect/CooldownColorRect")
+cooldown_label = NodePath("MarginContainer/TextureRect/CooldownColorRect/CooldownLabel")
 
-[node name="UtilityAbilityIndicator3" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+[node name="UtilityAbilityIndicator3" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" node_paths=PackedStringArray("texture_rect", "cooldown_color_rect", "cooldown_label") instance=ExtResource("12_rd10t")]
 layout_mode = 2
+texture_rect = NodePath("MarginContainer/TextureRect")
+cooldown_color_rect = NodePath("MarginContainer/TextureRect/CooldownColorRect")
+cooldown_label = NodePath("MarginContainer/TextureRect/CooldownColorRect/CooldownLabel")
 
-[node name="SpecialAbilityIndicator4" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" instance=ExtResource("12_rd10t")]
+[node name="SpecialAbilityIndicator4" parent="UI/UI/GameplayUI/PanelContainer2/BottomRight/AbilityIndicatorsContainer" node_paths=PackedStringArray("texture_rect", "cooldown_color_rect", "cooldown_label") instance=ExtResource("12_rd10t")]
 layout_mode = 2
+texture_rect = NodePath("MarginContainer/TextureRect")
+cooldown_color_rect = NodePath("MarginContainer/TextureRect/CooldownColorRect")
+cooldown_label = NodePath("MarginContainer/TextureRect/CooldownColorRect/CooldownLabel")
 
 [node name="MarginContainer" type="MarginContainer" parent="UI/UI/GameplayUI"]
 layout_mode = 0
@@ -370,4 +386,4 @@ level_manager = NodePath("../LevelManager")
 player_prefab = ExtResource("6_qj4uo")
 manual_player_prefab = ExtResource("12_206qu")
 manual_bot_player_prefab = ExtResource("17_gnoow")
-color_palettes = Array[Resource("res://scripts/color_palette.gd")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q"), ExtResource("16_3lkbo"), ExtResource("17_o2b06"), ExtResource("18_g4vh6"), ExtResource("19_ltbxw"), ExtResource("20_qxqyi"), ExtResource("21_vb1lf")])
+color_palettes = Array[ExtResource("18_84ff0")]([ExtResource("13_3ofs7"), ExtResource("14_fdi5q"), ExtResource("16_3lkbo"), ExtResource("17_o2b06"), ExtResource("18_g4vh6"), ExtResource("19_ltbxw"), ExtResource("20_qxqyi"), ExtResource("21_vb1lf")])
